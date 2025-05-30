@@ -1,0 +1,54 @@
+{
+  "manifestVersion": 4,
+  "id": "com.example.lutlauncher",
+  "name": "LUT Launcher",
+  "version": "1.0.0",
+  "main": "index.html",
+  "host": {
+    "app": "PS",
+    "minVersion": "26.0.0"
+  },
+
+  "icons": [
+    {
+      "width": 48,
+      "height": 48,
+      "path": "assets/icons/lut-icon.png",
+      "scale": [1, 2],
+      "theme": ["all"],
+      "species": ["generic"]
+    }
+  ],
+
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "lutLauncherPanel",
+      "label": {
+        "default": "LUT Launcher"
+      },
+      "minimumSize": {
+        "width": 272,
+        "height": 430
+      },
+      "preferredDockedSize": {
+        "width": 272,
+        "height": 430
+      },
+
+      "icons": [
+        {
+          "width": 23,
+          "height": 23,
+          "path": "assets/icons/lut-icon.png",
+          "scale": [1, 2],
+          "theme": ["all"]
+        }
+      ]
+    }
+  ],
+
+  "featureFlags": {
+    "enableAlerts": true
+  }
+}
