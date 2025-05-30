@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   createTemplateBtn.addEventListener("click", createLutTemplate);
   applyToPhotoBtn  .addEventListener("click", applyToPhoto);
-  applyFilmBtn     .addEventListener("click", applyFilmLayer);
+  applyFilmBtn     .addEventListener("click", applyAdvancedFilmEffects);
 
   function updateStatus(msg) {
     statusDiv.textContent = msg;
@@ -176,6 +176,31 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("テンプレートから調整レイヤーを適用しました。");
   }
 
+  // ── フィルムエフェクト設定定数 ──
+  const FILM_EFFECTS_CONFIG = {
+    halation: {
+      enabled: true,
+      name: "Halation",
+      blurRadius: 25,
+      opacity: 15,
+      blendMode: "screen"
+    },
+    dreamyHaze: {
+      enabled: true,
+      name: "Dreamy Haze",
+      blurRadius: 8,
+      opacity: 20,
+      blendMode: "softLight"
+    },
+    darkGrain: {
+      enabled: true,
+      name: "Dark Grain",
+      grainAmount: 25,
+      opacity: 40,
+      blendMode: "multiply"
+    }
+  };
+
   // ── Filmレイヤー適用（新機能） ──
   async function applyFilmLayer() {
     console.log("▶ applyFilmLayer start");
@@ -204,6 +229,294 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("applyFilmLayer error:", e);
       alert("Filmレイヤーの適用に失敗しました。");
+    }
+  }
+
+  // ── 高度なFilmエフェクト適用 ──
+  async function applyAdvancedFilmEffects() {
+    console.log("▶ applyAdvancedFilmEffects start");
+    
+    if (!app.activeDocument) {
+      alert("最初に写真を開いてください。");
+      return;
+    }
+
+    if (!confirm("高度なフィルムエフェクト（ハレーション、Dreamy Haze、暗部グレイン）を適用しますか？\n処理に時間がかかる場合があります。")) {
+      return;
+    }
+
+    try {
+      updateStatus("フィルムエフェクト処理中...");
+      
+      await core.executeAsModal(async () => {
+        // 各エフェクトを段階的に適用
+        console.log("🎬 Starting film effects application...");
+        
+        // ハレーション効果
+        if (FILM_EFFECTS_CONFIG.halation.enabled) {
+          console.log("✨ Applying halation effect...");
+          await applyHalationEffect();
+        }
+        
+        // Dreamy Haze効果
+        if (FILM_EFFECTS_CONFIG.dreamyHaze.enabled) {
+          console.log("🌙 Applying dreamy haze effect...");
+          await applyDreamyHazeEffect();
+        }
+        
+        // 暗部グレイン効果
+        if (FILM_EFFECTS_CONFIG.darkGrain.enabled) {
+          console.log("📽️ Applying dark grain effect...");
+          await applyDarkGrainEffect();
+        }
+        
+        console.log("🎉 All film effects applied successfully!");
+      }, { commandName: "Apply Advanced Film Effects" });
+
+      updateStatus("高度なフィルムエフェクト適用完了");
+      alert("すべてのフィルムエフェクトが適用されました！\nレイヤーパネルで各エフェクトレイヤーを確認してください。");
+      
+    } catch (e) {
+      console.error("applyAdvancedFilmEffects error:", e);
+      updateStatus("エラーが発生しました");
+      alert("フィルムエフェクトの適用中にエラーが発生しました: " + e.message);
+    }
+  }
+
+  // ── ハレーション効果の適用 ──
+  async function applyHalationEffect() {
+    try {
+      console.log("🌟 Creating halation effect...");
+      
+      const config = FILM_EFFECTS_CONFIG.halation;
+      
+      // 1) 現在のレイヤーを複製
+      await action.batchPlay([{
+        _obj: "duplicate",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        name: config.name
+      }], { synchronousExecution: true });
+      
+      // 2) ガウシアンブラーを適用
+      await action.batchPlay([{
+        _obj: "gaussianBlur",
+        radius: { _unit: "pixelsUnit", _value: config.blurRadius },
+        integerMath: false,
+        _options: { dialogOptions: "dontDisplay" }
+      }], { synchronousExecution: true });
+      
+      // 3) ブレンドモードをスクリーンに変更
+      await action.batchPlay([{
+        _obj: "set",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: {
+          _obj: "layer",
+          mode: { _enum: "blendMode", _value: config.blendMode }
+        }
+      }], { synchronousExecution: true });
+      
+      // 4) 不透明度を調整
+      await action.batchPlay([{
+        _obj: "set",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: {
+          _obj: "layer",
+          opacity: { _unit: "percentUnit", _value: config.opacity }
+        }
+      }], { synchronousExecution: true });
+      
+      console.log(`✨ Halation effect applied successfully (opacity: ${config.opacity}%, blur: ${config.blurRadius}px)`);
+      
+    } catch (e) {
+      console.error("applyHalationEffect error:", e);
+      throw new Error(`ハレーション効果の適用に失敗: ${e.message}`);
+    }
+  }
+
+  // ── Dreamy Haze効果の適用 ──
+  async function applyDreamyHazeEffect() {
+    try {
+      console.log("🌙 Creating dreamy haze effect...");
+      
+      const config = FILM_EFFECTS_CONFIG.dreamyHaze;
+      
+      // 1) 現在のレイヤーを複製
+      await action.batchPlay([{
+        _obj: "duplicate",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        name: config.name
+      }], { synchronousExecution: true });
+      
+      // 2) より小さなガウシアンブラーを適用（dreamy効果）
+      await action.batchPlay([{
+        _obj: "gaussianBlur",
+        radius: { _unit: "pixelsUnit", _value: config.blurRadius },
+        integerMath: false,
+        _options: { dialogOptions: "dontDisplay" }
+      }], { synchronousExecution: true });
+      
+      // 3) ブレンドモードをソフトライトに変更
+      await action.batchPlay([{
+        _obj: "set",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: {
+          _obj: "layer",
+          mode: { _enum: "blendMode", _value: config.blendMode }
+        }
+      }], { synchronousExecution: true });
+      
+      // 4) 不透明度を調整
+      await action.batchPlay([{
+        _obj: "set",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: {
+          _obj: "layer",
+          opacity: { _unit: "percentUnit", _value: config.opacity }
+        }
+      }], { synchronousExecution: true });
+      
+      // 5) 軽いカラーバランス調整（より暖かく）
+      await action.batchPlay([{
+        _obj: "make",
+        _target: [{ _ref: "adjustmentLayer" }],
+        using: {
+          _obj: "adjustmentLayer",
+          name: "Dreamy Warmth",
+          type: {
+            _obj: "colorBalance",
+            shadowLevels: [-5, 0, 15],
+            midtoneLevels: [-10, 0, 10],
+            highlightLevels: [-8, 0, 5],
+            preserveLuminosity: true
+          }
+        }
+      }], { synchronousExecution: true });
+      
+      // 6) 調整レイヤーをDreamy Hazeレイヤーにクリップ
+      await action.batchPlay([{
+        _obj: "groupLayersEvent",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }]
+      }], { synchronousExecution: true });
+      
+      console.log(`🌙 Dreamy haze effect applied successfully (opacity: ${config.opacity}%, blur: ${config.blurRadius}px)`);
+      
+    } catch (e) {
+      console.error("applyDreamyHazeEffect error:", e);
+      throw new Error(`Dreamy Haze効果の適用に失敗: ${e.message}`);
+    }
+  }
+
+  // ── 暗部グレイン効果の適用 ──
+  async function applyDarkGrainEffect() {
+    try {
+      console.log("📽️ Creating dark grain effect...");
+      
+      const config = FILM_EFFECTS_CONFIG.darkGrain;
+      
+      // 1) 新しいレイヤーを作成してノイズで塗りつぶし
+      await action.batchPlay([{
+        _obj: "make",
+        _target: [{ _ref: "layer" }],
+        using: {
+          _obj: "layer",
+          name: config.name
+        }
+      }], { synchronousExecution: true });
+      
+      // 2) 50%グレーで塗りつぶし
+      await action.batchPlay([{
+        _obj: "fill",
+        using: {
+          _enum: "fillContents",
+          _value: "gray"
+        },
+        mode: {
+          _enum: "blendMode",
+          _value: "normal"
+        },
+        opacity: {
+          _unit: "percentUnit",
+          _value: 100
+        }
+      }], { synchronousExecution: true });
+      
+      // 3) ノイズフィルターを適用
+      await action.batchPlay([{
+        _obj: "noiseFilter",
+        amount: { _unit: "percentUnit", _value: config.grainAmount },
+        distribution: { _enum: "noiseDistribution", _value: "uniform" },
+        monochromatic: true,
+        _options: { dialogOptions: "dontDisplay" }
+      }], { synchronousExecution: true });
+      
+      // 4) ブレンドモードをマルチプライに変更
+      await action.batchPlay([{
+        _obj: "set",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: {
+          _obj: "layer",
+          mode: { _enum: "blendMode", _value: config.blendMode }
+        }
+      }], { synchronousExecution: true });
+      
+      // 5) 不透明度を調整
+      await action.batchPlay([{
+        _obj: "set",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: {
+          _obj: "layer",
+          opacity: { _unit: "percentUnit", _value: config.opacity }
+        }
+      }], { synchronousExecution: true });
+      
+      // 6) 暗部のみに適用するためのマスクを作成
+      await action.batchPlay([{
+        _obj: "make",
+        _target: [{ _ref: "channel" }],
+        new: {
+          _class: "channel"
+        },
+        using: {
+          _enum: "userMaskEnabled",
+          _value: "revealAll"
+        }
+      }], { synchronousExecution: true });
+      
+      // 7) 元画像の暗部を選択するためのレベル調整をマスクに適用
+      await action.batchPlay([{
+        _obj: "applyImageEvent",
+        with: {
+          _path: [
+            { _property: "selection" },
+            { _property: "document" }
+          ]
+        },
+        source: {
+          _enum: "channel",
+          _ref: "channel",
+          _value: "gray"
+        },
+        target: {
+          _enum: "channel",
+          _ref: "channel", 
+          _value: "mask"
+        },
+        blending: {
+          _enum: "blendMode",
+          _value: "normal"
+        },
+        opacity: {
+          _unit: "percentUnit",
+          _value: 100
+        },
+        invert: true
+      }], { synchronousExecution: true });
+      
+      console.log(`📽️ Dark grain effect applied successfully (opacity: ${config.opacity}%, grain: ${config.grainAmount}%)`);
+      
+    } catch (e) {
+      console.error("applyDarkGrainEffect error:", e);
+      throw new Error(`暗部グレイン効果の適用に失敗: ${e.message}`);
     }
   }
 });
