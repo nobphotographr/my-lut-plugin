@@ -413,7 +413,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const config = FILM_EFFECTS_CONFIG.darkGrain;
       
-      // 1) 新しいレイヤーを作成してノイズで塗りつぶし
+      // 1) 新しいレイヤーを作成
       await action.batchPlay([{
         _obj: "make",
         _target: [{ _ref: "layer" }],
@@ -442,20 +442,19 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // 3) ノイズフィルターを適用
       await action.batchPlay([{
-        _obj: "noiseFilter",
+        _obj: "addNoise",
         amount: { _unit: "percentUnit", _value: config.grainAmount },
-        distribution: { _enum: "noiseDistribution", _value: "uniform" },
-        monochromatic: true,
-        _options: { dialogOptions: "dontDisplay" }
+        distribution: { _enum: "distribution", _value: "gaussian" },
+        monochromatic: true
       }], { synchronousExecution: true });
       
-      // 4) ブレンドモードをマルチプライに変更
+      // 4) ブレンドモードをオーバーレイに変更（より自然な効果）
       await action.batchPlay([{
         _obj: "set",
         _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
         to: {
           _obj: "layer",
-          mode: { _enum: "blendMode", _value: config.blendMode }
+          mode: { _enum: "blendMode", _value: "overlay" }
         }
       }], { synchronousExecution: true });
       
@@ -467,49 +466,6 @@ document.addEventListener("DOMContentLoaded", () => {
           _obj: "layer",
           opacity: { _unit: "percentUnit", _value: config.opacity }
         }
-      }], { synchronousExecution: true });
-      
-      // 6) 暗部のみに適用するためのマスクを作成
-      await action.batchPlay([{
-        _obj: "make",
-        _target: [{ _ref: "channel" }],
-        new: {
-          _class: "channel"
-        },
-        using: {
-          _enum: "userMaskEnabled",
-          _value: "revealAll"
-        }
-      }], { synchronousExecution: true });
-      
-      // 7) 元画像の暗部を選択するためのレベル調整をマスクに適用
-      await action.batchPlay([{
-        _obj: "applyImageEvent",
-        with: {
-          _path: [
-            { _property: "selection" },
-            { _property: "document" }
-          ]
-        },
-        source: {
-          _enum: "channel",
-          _ref: "channel",
-          _value: "gray"
-        },
-        target: {
-          _enum: "channel",
-          _ref: "channel", 
-          _value: "mask"
-        },
-        blending: {
-          _enum: "blendMode",
-          _value: "normal"
-        },
-        opacity: {
-          _unit: "percentUnit",
-          _value: 100
-        },
-        invert: true
       }], { synchronousExecution: true });
       
       console.log(`📽️ Dark grain effect applied successfully (opacity: ${config.opacity}%, grain: ${config.grainAmount}%)`);
