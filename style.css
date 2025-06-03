@@ -1,100 +1,234 @@
-/* 全体背景 */
-body {
+/* 基本スタイルの初期化 */
+html, body {
+  height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  background: #2a2a2a;
-  color: #fff;
 }
 
-/* パネル本体 */
-.panel {
-  background: #2a2a2a;
-  width: 272px;
-  height: 430px;
-  padding: 24px;
-  box-sizing: border-box;
-  text-align: center;
-  border: 1px solid #4a90e2;
+/* 初期パネルのスタイル */
+#initialPanel {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  background-color: #3d3d3d;
+  color: #fff;
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", sans-serif;
+  font-size: 15px;
+  height: 100%;
+  width: 100%;
+  max-width: 352px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
-/* ヘッダー */
-.panel h1 {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
+/* ロゴスタイル */
+#initialPanel .logo {
+  margin-top: 43.09px;
+  margin-bottom: 28px;
+  max-width: 200px;
+  height: auto;
+}
+
+/* パネルボタンスタイル */
+#initialPanel .panel-button {
+  width: 272px;
+  height: 40px;
+  margin-bottom: 28px;
+  background-color: rgb(60, 60, 60);
+  border: 1px solid rgb(82, 82, 82);
+  border-radius: 6px;
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", sans-serif;
+  font-size: 15px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 12px;
 }
 
-/* GLAZEロゴテキスト */
-.panel h1 .logo-text {
-  font-size: 2rem;
-  font-weight: 900;
-  color: #888;
-  letter-spacing: 2px;
+#initialPanel .panel-button:last-of-type {
+  margin-bottom: 24px;
 }
 
-/* アイコン */
-.lut-icon {
-  width: 48px;
-  height: 48px;
+#initialPanel .panel-button:hover {
+  background-color: rgb(82, 82, 82);
 }
 
-/* ボタンコンテナ */
-.button-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex-grow: 1;
-  justify-content: center;
+#initialPanel .panel-button:active {
+  background-color: rgb(50, 50, 50);
 }
 
-/* ボタン共通 */
-button {
-  width: 100%;
-  height: 32px;
-  padding: 0 16px;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #fff;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-  background: #555;
+/* 特定ボタンのスタイル（既存の機能維持） */
+#createTemplateBtn:hover {
+  background-color: #4a90e2;
 }
 
-/* 新規テンプレート作成ボタン */
-#createTemplateBtn {
-  background: #666;
-}
-
-/* 写真に適用ボタン */
-#applyToPhotoBtn {
-  background: #666;
-}
-
-/* Filmレイヤー適用ボタン */
-#applyFilmBtn {
-  background: #666;
-}
-
-/* ホバー効果 */
-button:hover {
-  background: #777;
+#createTemplateBtn:active {
+  background-color: #357abd;
 }
 
 /* ステータス表示 */
 #status {
-  margin-top: 16px;
-  font-size: 0.8rem;
+  margin-top: 20px;
+  font-size: 14px;
   color: #ccc;
-  height: 20px;
+  text-align: center;
+  width: 272px;
+  min-height: 20px;
+}
+
+/* ダイアログスタイル - ExtendScript風 */
+dialog {
+  background: #3d3d3d;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  color: #fff;
+  padding: 20px;
+  max-width: 450px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", sans-serif;
+}
+
+/* タイトル */
+dialog h2 {
+  margin: 0 0 20px 0;
+  color: #fff;
+  font-size: 1.1rem;
+  text-align: center;
+  font-weight: normal;
+  border: none;
+  padding: 0;
+}
+
+/* 設定パネル（グループボックス風） */
+.setting-panel {
+  background: #2a2a2a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.setting-panel-title {
+  color: #ccc;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  font-weight: normal;
+}
+
+/* チェックボックスグループ */
+.checkbox-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #bbb;
+  font-size: 0.85rem;
+}
+
+/* 数値入力グループ */
+.input-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.input-group label {
+  color: #bbb;
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+/* 数値入力フィールド */
+input[type="number"] {
+  background: #1a1a1a;
+  border: 1px solid #555;
+  color: #fff;
+  padding: 4px 8px;
+  width: 80px;
+  border-radius: 3px;
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+/* チェックボックススタイル */
+input[type="checkbox"] {
+  margin-right: 6px;
+  accent-color: #4a90e2;
+}
+
+/* ダイアログボタン */
+.dialog-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #555;
+}
+
+.dialog-buttons button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-width: 80px;
+}
+
+.dialog-buttons button[type="button"] {
+  background: #666;
+  color: #fff;
+}
+
+.dialog-buttons button[type="button"]:hover {
+  background: #777;
+}
+
+.dialog-buttons button.primary {
+  background: #4a90e2;
+  color: #fff;
+}
+
+.dialog-buttons button.primary:hover {
+  background: #357abd;
+}
+
+/* アラートダイアログのスタイル */
+.alert-dialog {
+  min-width: 400px;  /* 最小幅を設定 */
+  max-width: 600px;  /* 最大幅を設定 */
+}
+
+.alert-dialog .dialog-content {
+  padding: 30px;
+  word-wrap: break-word;  /* 長い単語の折り返し */
+  white-space: normal;    /* 通常の折り返し */
+  line-height: 1.5;       /* 行間を適切に */
+}
+
+.alert-dialog .dialog-content p {
+  margin: 0;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.alert-dialog .dialog-buttons {
+  padding: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.alert-dialog .dialog-buttons button {
+  min-width: 80px;
 }

@@ -6,23 +6,88 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="panel">
-    <!-- ヘッダー -->
-    <h1>
-      <img src="assets/icons/lut-icon.png" alt="LUT Icon" class="lut-icon" />
-      <span class="logo-text">GLAZE</span>
-    </h1>
-
-    <!-- ボタンコンテナ -->
-    <div class="button-container">
-      <button id="createTemplateBtn">新規 LUT テンプレート作成</button>
-      <button id="applyToPhotoBtn">ファイルへLUTレイヤー適用</button>
-      <button id="applyFilmBtn">Filmレイヤー適用</button>
-    </div>
-
+  <div id="initialPanel">
+    <img src="assets/icons/Logo.png" alt="GLAZE Logo" class="logo">
+    <button id="createTemplateBtn" class="panel-button">新規 LUT テンプレート作成</button>
+    <button id="applyToPhotoBtn" class="panel-button">ファイルへLUTレイヤー適用</button>
+    <button id="applyFilmBtn" class="panel-button">Filmレイヤー適用</button>
+    
     <!-- ステータス表示 -->
     <div id="status"></div>
   </div>
+
+  <!-- フィルムエフェクト設定ダイアログ -->
+  <dialog id="thresholdDialog">
+    <form method="dialog">
+      <h2>フィルムエフェクト設定</h2>
+      
+      <!-- 有効にする効果 -->
+      <div class="setting-panel">
+        <div class="setting-panel-title">有効にする効果:</div>
+        <div class="checkbox-group">
+          <label><input type="checkbox" id="enableHalation" checked> ハレーション効果</label>
+          <label><input type="checkbox" id="enableDreamyHaze" checked> Dreamy Haze効果</label>
+          <label><input type="checkbox" id="enableDarkGrain" checked> 暗部グレイン効果</label>
+        </div>
+      </div>
+      
+      <!-- ハレーション設定 -->
+      <div class="setting-panel">
+        <div class="setting-panel-title">ハレーション設定:</div>
+        <div class="input-group">
+          <label for="thresholdInput">閾値:</label>
+          <input type="number" id="thresholdInput" value="200" min="100" max="250" step="5">
+        </div>
+        <div class="input-group">
+          <label for="blurRadiusInput">ぼかし半径 (px):</label>
+          <input type="number" id="blurRadiusInput" value="30" min="10" max="60" step="5">
+        </div>
+      </div>
+      
+      <!-- Dreamy Haze設定 -->
+      <div class="setting-panel">
+        <div class="setting-panel-title">Dreamy Haze設定:</div>
+        <div class="input-group">
+          <label for="dreamyBlurRadiusInput">ぼかし半径 (px):</label>
+          <input type="number" id="dreamyBlurRadiusInput" value="50" min="10" max="100" step="5">
+        </div>
+        <div class="input-group">
+          <label for="dreamyBlurOpacityInput">ぼかしレイヤー不透明度 (%):</label>
+          <input type="number" id="dreamyBlurOpacityInput" value="90" min="0" max="100" step="5">
+        </div>
+        <div class="checkbox-group">
+          <label><input type="checkbox" id="dreamyToneCurve" checked> トーンカーブ調整</label>
+          <label><input type="checkbox" id="dreamyGradientMap" checked> グラデーションマップ調整</label>
+        </div>
+        <div class="input-group">
+          <label for="dreamyGradientOpacityInput">グラデーションマップ不透明度 (%):</label>
+          <input type="number" id="dreamyGradientOpacityInput" value="15" min="0" max="50" step="1">
+        </div>
+      </div>
+      
+      <!-- 暗部グレイン設定 -->
+      <div class="setting-panel">
+        <div class="setting-panel-title">暗部グレイン設定:</div>
+        <div class="input-group">
+          <label for="shadowThresholdInput">暗部しきい値:</label>
+          <input type="number" id="shadowThresholdInput" value="80" min="0" max="255" step="5">
+        </div>
+        <div class="input-group">
+          <label for="grainAmountInput">グレイン量 (%):</label>
+          <input type="number" id="grainAmountInput" value="25" min="1" max="50" step="1">
+        </div>
+        <div class="input-group">
+          <label for="featherRadiusInput">マスクのフェザー (px):</label>
+          <input type="number" id="featherRadiusInput" value="20" min="0" max="50" step="2">
+        </div>
+      </div>
+      
+      <div class="dialog-buttons">
+        <button type="button" id="cancelBtn">キャンセル</button>
+        <button type="submit" id="applyBtn" class="primary">適用</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="main.js"></script>
 </body>
