@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
       threshold: 200,        // 2階調化しきい値（より明るい部分のみ）
       blurRadius: 30,        // ガウスぼかし半径
       opacity: 60,           // スクリーンレイヤーの不透明度（控えめに）
-      color: { r: 255, g: 200, b: 150 }, // より淡いオレンジ色
+      color: { r: 220, g: 89, b: 1 }, // オレンジ色 (#dc5901)
       overlayOpacity: 15     // オーバーレイレイヤーの不透明度（かなり控えめに）
     },
     dreamyHaze: {
