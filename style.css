@@ -108,11 +108,16 @@ dialog h2 {
 
 /* 設定パネル（グループボックス風） */
 .setting-panel {
-  background: #2a2a2a;
-  border: 1px solid #555;
+  background: #3d3d3d;
+  border: none;
   border-radius: 4px;
   padding: 12px;
   margin-bottom: 12px;
+  border-bottom: 1px solid #2c2d2d;
+}
+
+.setting-panel:last-child {
+  border-bottom: none;
 }
 
 .setting-panel-title {
@@ -124,7 +129,10 @@ dialog h2 {
 
 /* チェックボックスグループ */
 .checkbox-group label {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   margin-bottom: 5px;
   color: #bbb;
   font-size: 0.85rem;
@@ -147,7 +155,7 @@ dialog h2 {
 /* 数値入力フィールド */
 input[type="number"] {
   background: #1a1a1a;
-  border: 1px solid #555;
+  border: 1px solid #fff;
   color: #fff;
   padding: 4px 8px;
   width: 80px;
@@ -178,16 +186,18 @@ input[type="checkbox"] {
 }
 
 .dialog-buttons button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
+  padding: 4px 8px;
+  border: 1px solid #fff;
+  border-radius: 3px;
   font-size: 0.9rem;
   cursor: pointer;
-  min-width: 80px;
+  width: 76px;
+  height: 24px;
+  box-sizing: border-box;
 }
 
 .dialog-buttons button[type="button"] {
-  background: #666;
+  background: transparent;
   color: #fff;
 }
 
@@ -196,7 +206,7 @@ input[type="checkbox"] {
 }
 
 .dialog-buttons button.primary {
-  background: #4a90e2;
+  background: #2c2d2d;
   color: #fff;
 }
 

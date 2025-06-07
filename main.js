@@ -653,24 +653,14 @@ document.addEventListener("DOMContentLoaded", () => {
             color: {
               _obj: "RGBColor",
               red: config.color.r,
-              grain: config.color.g,
+              green: config.color.g,
               blue: config.color.b
             }
           }
         }
       }], { synchronousExecution: true });
       
-      // 6) クリッピングマスクを作成（修正版）
-      await action.batchPlay([{
-        _obj: "set",
-        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
-        to: {
-          _obj: "layer",
-          group: true
-        }
-      }], { synchronousExecution: true });
-      
-      // 7) 塗りつぶしレイヤーの描画モードをオーバーレイに変更
+      // 6) 塗りつぶしレイヤーの描画モードをオーバーレイに変更
       await action.batchPlay([{
         _obj: "set",
         _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
@@ -678,6 +668,16 @@ document.addEventListener("DOMContentLoaded", () => {
           _obj: "layer",
           mode: { _enum: "blendMode", _value: "overlay" },
           opacity: { _unit: "percentUnit", _value: config.overlayOpacity }
+        }
+      }], { synchronousExecution: true });
+      
+      // 7) クリッピングマスクを作成（塗りつぶしレイヤーをハレーションベースにクリップ）
+      await action.batchPlay([{
+        _obj: "set",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: {
+          _obj: "layer",
+          group: true
         }
       }], { synchronousExecution: true });
       
