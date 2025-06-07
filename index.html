@@ -11,6 +11,7 @@
     <button id="createTemplateBtn" class="panel-button">新規 LUT テンプレート作成</button>
     <button id="applyToPhotoBtn" class="panel-button">ファイルへLUTレイヤー適用</button>
     <button id="applyFilmBtn" class="panel-button">Filmレイヤー適用</button>
+    <button id="deleteHiddenLayersBtn" class="panel-button">非表示レイヤー削除</button>
     
     <!-- ステータス表示 -->
     <div id="status"></div>
@@ -85,6 +86,21 @@
       <div class="dialog-buttons">
         <button type="button" id="cancelBtn">キャンセル</button>
         <button type="submit" id="applyBtn" class="primary">適用</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 非表示レイヤー削除確認ダイアログ -->
+  <dialog id="deleteConfirmDialog">
+    <form method="dialog">
+      <h2>非表示レイヤー削除</h2>
+      <div class="dialog-content">
+        <p>削除対象: <span id="deleteCount">0</span>個のレイヤー</p>
+        <p>⚠️ この操作は取り消せません</p>
+      </div>
+      <div class="dialog-buttons">
+        <button type="button" id="deleteCancelBtn">キャンセル</button>
+        <button type="submit" id="deleteConfirmBtn" class="primary">削除実行</button>
       </div>
     </form>
   </dialog>

@@ -8,11 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const createTemplateBtn = document.getElementById("createTemplateBtn");
   const applyToPhotoBtn   = document.getElementById("applyToPhotoBtn");
   const applyFilmBtn      = document.getElementById("applyFilmBtn");
+  const deleteHiddenLayersBtn = document.getElementById("deleteHiddenLayersBtn");
   const statusDiv         = document.getElementById("status");
 
   createTemplateBtn.addEventListener("click", createLutTemplate);
   applyToPhotoBtn  .addEventListener("click", applyToPhoto);
   applyFilmBtn     .addEventListener("click", applyAdvancedFilmEffects);
+  deleteHiddenLayersBtn.addEventListener("click", deleteHiddenLayers);
 
   function updateStatus(msg) {
     statusDiv.textContent = msg;
@@ -1028,6 +1030,186 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("applyDarkGrainEffect error:", e);
       throw new Error(`暗部グレイン効果の適用に失敗: ${e.message}`);
+    }
+  }
+
+  // ── 非表示レイヤー削除機能 ──
+  async function deleteHiddenLayers() {
+    console.log("▶ deleteHiddenLayers start");
+    
+    if (!app.activeDocument) {
+      showAlert("最初に写真を開いてください。");
+      return;
+    }
+
+    try {
+      updateStatus("非表示レイヤーを検索中...");
+      
+      // 非表示レイヤーを検出
+      const hiddenLayers = await findHiddenLayers();
+      console.log(`🔍 Found ${hiddenLayers.length} hidden layers`);
+      
+      if (hiddenLayers.length === 0) {
+        showAlert("削除対象の非表示レイヤーがありません。");
+        updateStatus("");
+        return;
+      }
+
+      // 削除対象をフィルタリング
+      const deletableLayers = filterDeletableLayers(hiddenLayers);
+      console.log(`📝 Deletable layers: ${deletableLayers.length}`);
+      
+      if (deletableLayers.length === 0) {
+        showAlert("削除可能な非表示レイヤーがありません。<br>（背景レイヤーやロックレイヤーは除外されます）");
+        updateStatus("");
+        return;
+      }
+
+      // 確認ダイアログを表示
+      const confirmed = await showDeleteConfirmDialog(deletableLayers.length);
+      if (!confirmed) {
+        updateStatus("処理がキャンセルされました");
+        return;
+      }
+
+      // 削除実行
+      await executeLayerDeletion(deletableLayers);
+      
+      updateStatus(`${deletableLayers.length}個の非表示レイヤーを削除しました`);
+      showAlert(`${deletableLayers.length}個の非表示レイヤーを削除しました。`);
+      
+    } catch (e) {
+      console.error("deleteHiddenLayers error:", e);
+      updateStatus("エラーが発生しました");
+      showAlert("非表示レイヤーの削除中にエラーが発生しました:<br>" + e.message);
+    }
+  }
+
+  // ── 非表示レイヤー検出関数 ──
+  async function findHiddenLayers() {
+    const hiddenLayers = [];
+    const doc = app.activeDocument;
+    
+    function collectHiddenLayers(layers) {
+      for (const layer of layers) {
+        // 非表示レイヤーをチェック
+        if (!layer.visible) {
+          hiddenLayers.push(layer);
+        }
+        
+        // グループレイヤーの場合は再帰的に検索
+        if (layer.kind === constants.LayerKind.GROUP && layer.layers) {
+          collectHiddenLayers(layer.layers);
+        }
+      }
+    }
+    
+    collectHiddenLayers(doc.layers);
+    return hiddenLayers;
+  }
+
+  // ── 削除対象フィルタリング関数 ──
+  function filterDeletableLayers(hiddenLayers) {
+    return hiddenLayers.filter(layer => {
+      // 背景レイヤーは除外
+      if (layer.isBackgroundLayer) {
+        console.log(`Excluding background layer: ${layer.name}`);
+        return false;
+      }
+      
+      // ロックされたレイヤーは除外
+      if (layer.locked) {
+        console.log(`Excluding locked layer: ${layer.name}`);
+        return false;
+      }
+      
+      // 重要なレイヤー名パターンは除外
+      const protectedNames = ['background', 'レイヤー 0', '背景'];
+      const layerNameLower = layer.name.toLowerCase();
+      if (protectedNames.some(name => layerNameLower.includes(name.toLowerCase()))) {
+        console.log(`Excluding protected layer: ${layer.name}`);
+        return false;
+      }
+      
+      return true;
+    });
+  }
+
+  // ── 削除確認ダイアログ表示 ──
+  async function showDeleteConfirmDialog(layerCount) {
+    return new Promise((resolve) => {
+      const dialog = document.getElementById('deleteConfirmDialog');
+      const deleteCountSpan = document.getElementById('deleteCount');
+      const deleteCancelBtn = document.getElementById('deleteCancelBtn');
+      const deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
+      
+      // 削除対象数を表示
+      deleteCountSpan.textContent = layerCount;
+      
+      const handleCancel = () => {
+        dialog.close();
+        cleanup();
+        resolve(false);
+      };
+      
+      const handleConfirm = (e) => {
+        e.preventDefault();
+        dialog.close();
+        cleanup();
+        resolve(true);
+      };
+      
+      const form = dialog.querySelector('form');
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        handleConfirm(e);
+      };
+      
+      const cleanup = () => {
+        deleteCancelBtn.removeEventListener('click', handleCancel);
+        deleteConfirmBtn.removeEventListener('click', handleConfirm);
+        form.removeEventListener('submit', handleSubmit);
+      };
+      
+      // イベントリスナーを追加
+      deleteCancelBtn.addEventListener('click', handleCancel);
+      deleteConfirmBtn.addEventListener('click', handleConfirm);
+      form.addEventListener('submit', handleSubmit);
+      
+      // ダイアログを表示
+      dialog.showModal();
+    });
+  }
+
+  // ── 削除実行処理 ──
+  async function executeLayerDeletion(layersToDelete) {
+    try {
+      await core.executeAsModal(async () => {
+        console.log(`🗑️ Deleting ${layersToDelete.length} layers...`);
+        
+        for (let i = 0; i < layersToDelete.length; i++) {
+          const layer = layersToDelete[i];
+          try {
+            console.log(`Deleting layer: ${layer.name}`);
+            
+            // UXP APIを使用してレイヤーを削除
+            await action.batchPlay([{
+              _obj: "delete",
+              _target: [{ _ref: "layer", _id: layer.id }]
+            }], { synchronousExecution: true });
+            
+          } catch (layerError) {
+            console.error(`Failed to delete layer ${layer.name}:`, layerError);
+            // 個別レイヤーの削除失敗は続行
+          }
+        }
+        
+        console.log("✅ Layer deletion completed");
+      }, { commandName: "Delete Hidden Layers" });
+      
+    } catch (error) {
+      console.error("executeLayerDeletion error:", error);
+      throw new Error(`レイヤー削除処理に失敗: ${error.message}`);
     }
   }
 });
