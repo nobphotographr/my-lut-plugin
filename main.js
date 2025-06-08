@@ -329,24 +329,25 @@ document.addEventListener("DOMContentLoaded", () => {
       await core.executeAsModal(async () => {
         console.log("🎬 Starting film effects application...");
         
-        // 既存レイヤーのIDを記録（フィルムエフェクト適用前）
+        // Film Effectsグループを取得または作成（１回だけ）
+        let filmEffectsGroup = null;
+        if (FILM_EFFECTS_CONFIG.organization.useGroups) {
+          filmEffectsGroup = await getOrCreateFilmEffectsGroup();
+        }
+        
+        // 既存レイヤーのIDを記録（Film Effectsグループ作成後、エフェクト適用前）
         const doc = app.activeDocument;
         const existingLayerIds = new Set();
         
-        console.log("🔧 DEBUG: Recording existing layers before film effects...");
+        console.log("🔧 DEBUG: Recording existing layers after group creation...");
         for (const layer of doc.layers) {
           existingLayerIds.add(layer.id);
           console.log(`🔧 DEBUG: Existing layer - id: ${layer.id}, name: "${layer.name}"`);
         }
         
-        // Film Effectsグループを取得または作成（１回だけ）
-        let filmEffectsGroup = null;
-        if (FILM_EFFECTS_CONFIG.organization.useGroups) {
-          filmEffectsGroup = await getOrCreateFilmEffectsGroup();
-          // グループのIDも既存レイヤーに追加（移動対象から除外）
-          if (filmEffectsGroup) {
-            existingLayerIds.add(filmEffectsGroup.id);
-          }
+        // グループのIDも既存レイヤーに追加（移動対象から除外）
+        if (filmEffectsGroup) {
+          existingLayerIds.add(filmEffectsGroup.id);
         }
         
         // 新規作成されたレイヤーのみをグループに移動する関数
