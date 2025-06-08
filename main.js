@@ -501,11 +501,21 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(`🔧 DEBUG: Layer ${i}: "${layer.name}" (id: ${layer.id}, kind: ${layer.kind})`);
       }
       
-      // レイヤーを選択
-      console.log(`🔧 DEBUG: Selecting layer "${layerName}"`);
+      // レイヤーの存在確認
+      const targetLayer = currentLayers.find(layer => layer.name === layerName);
+      if (!targetLayer) {
+        console.error(`❌ Layer "${layerName}" not found in current layers!`);
+        console.error(`❌ Available layers: ${currentLayers.map(l => l.name).join(', ')}`);
+        return false;
+      }
+      
+      console.log(`🔧 DEBUG: Found target layer - id: ${targetLayer.id}, name: "${targetLayer.name}"`);
+      
+      // レイヤーをIDで選択（より確実）
+      console.log(`🔧 DEBUG: Selecting layer by ID: ${targetLayer.id}`);
       await action.batchPlay([{
         _obj: "select",
-        _target: [{ _ref: "layer", _name: layerName }]
+        _target: [{ _ref: "layer", _id: targetLayer.id }]
       }], { synchronousExecution: true });
       
       console.log(`🔧 DEBUG: Layer selected successfully`);
@@ -657,12 +667,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const config = FILM_EFFECTS_CONFIG.halation;
       
       // 1) レイヤーを複製
+      console.log(`🔧 DEBUG: Creating "${config.name} Base" layer...`);
       await action.batchPlay([{
         _obj: "duplicate",
         _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
         name: config.name + " Base",
         version: 5
       }], { synchronousExecution: true });
+      
+      // 作成されたレイヤーを確認
+      const doc = app.activeDocument;
+      const topLayer = doc.layers[0];
+      console.log(`🔧 DEBUG: Created layer - name: "${topLayer.name}", id: ${topLayer.id}`);
       
       // 2) 2階調化を適用
       await action.batchPlay([{
@@ -687,6 +703,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }], { synchronousExecution: true });
       
       // 5) 塗りつぶしレイヤーを作成（オレンジ色）
+      console.log(`🔧 DEBUG: Creating "${config.name} Color" layer...`);
       await action.batchPlay([{
         _obj: "make",
         _target: [{ _ref: "contentLayer" }],
@@ -704,6 +721,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       }], { synchronousExecution: true });
+      
+      // 作成されたレイヤーを確認
+      const colorLayer = app.activeDocument.layers[0];
+      console.log(`🔧 DEBUG: Created color layer - name: "${colorLayer.name}", id: ${colorLayer.id}`);
       
       // 6) 塗りつぶしレイヤーの描画モードをオーバーレイに変更
       await action.batchPlay([{
