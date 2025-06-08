@@ -329,25 +329,14 @@ document.addEventListener("DOMContentLoaded", () => {
       await core.executeAsModal(async () => {
         console.log("🎬 Starting film effects application...");
         
-        // Film Effectsグループを取得または作成（１回だけ）
-        let filmEffectsGroup = null;
-        if (FILM_EFFECTS_CONFIG.organization.useGroups) {
-          filmEffectsGroup = await getOrCreateFilmEffectsGroup();
-        }
-        
-        // 既存レイヤーのIDを記録（Film Effectsグループ作成後、エフェクト適用前）
+        // 📋 STEP 1: エフェクト適用前の既存レイヤーIDを記録
         const doc = app.activeDocument;
         const existingLayerIds = new Set();
         
-        console.log("🔧 DEBUG: Recording existing layers after group creation...");
+        console.log("🔧 DEBUG: Recording existing layers before effects...");
         for (const layer of doc.layers) {
           existingLayerIds.add(layer.id);
           console.log(`🔧 DEBUG: Existing layer - id: ${layer.id}, name: "${layer.name}"`);
-        }
-        
-        // グループのIDも既存レイヤーに追加（移動対象から除外）
-        if (filmEffectsGroup) {
-          existingLayerIds.add(filmEffectsGroup.id);
         }
         
         // 新規作成されたレイヤーのみをグループに移動する関数
@@ -392,6 +381,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
         console.log("📐 Base layer:", baseLayerName);
         
+        // 📋 STEP 2: 各エフェクトを適用（グループなし状態）
+        console.log("🎬 Applying all film effects without grouping...");
+        
         // ハレーション効果
         if (FILM_EFFECTS_CONFIG.halation.enabled) {
           console.log("✨ Applying halation effect...");
@@ -413,7 +405,14 @@ document.addEventListener("DOMContentLoaded", () => {
           await applyDarkGrainEffect();
         }
         
-        // 🎯 すべてのエフェクト適用後、新規作成されたレイヤーのみをグループに移動
+        // 📋 STEP 3: すべてのエフェクト適用後、Film Effectsグループを作成
+        let filmEffectsGroup = null;
+        if (FILM_EFFECTS_CONFIG.organization.useGroups) {
+          console.log("🔧 DEBUG: Creating Film Effects group after all effects...");
+          filmEffectsGroup = await getOrCreateFilmEffectsGroup();
+        }
+        
+        // 📋 STEP 4: 新規作成されたレイヤーのみをグループに移動
         if (filmEffectsGroup) {
           console.log("🔧 DEBUG: Moving only newly created film effect layers to group...");
           const movedCount = await moveNewLayersToGroup(filmEffectsGroup, existingLayerIds);
