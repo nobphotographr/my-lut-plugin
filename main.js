@@ -436,13 +436,32 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── レイヤー選択ユーティリティ ──
   async function selectBottomLayer() {
     try {
-      // 最下位レイヤー（通常は元の写真）を選択
+      console.log("🔧 DEBUG: Selecting bottom layer for effect base...");
+      
+      // Original Imageレイヤーを探して選択
+      const doc = app.activeDocument;
+      for (const layer of doc.layers) {
+        if (layer.name === "Original Image" && layer.kind === constants.LayerKind.PIXEL) {
+          console.log(`🔧 DEBUG: Found Original Image layer - id: ${layer.id}`);
+          await action.batchPlay([{
+            _obj: "select",
+            _target: [{ _ref: "layer", _id: layer.id }]
+          }], { synchronousExecution: true });
+          console.log("✓ Original Image layer selected");
+          return;
+        }
+      }
+      
+      // Original Imageが見つからない場合は最下位レイヤーを選択
+      console.log("🔧 DEBUG: Original Image not found, selecting bottom layer");
       await action.batchPlay([{
         _obj: "select",
         _target: [{ _ref: "layer", _enum: "ordinal", _value: "back" }]
       }], { synchronousExecution: true });
+      console.log("✓ Bottom layer selected");
+      
     } catch (e) {
-      console.log("レイヤー選択エラー (無視):", e.message);
+      console.error("❌ Layer selection error:", e.message);
     }
   }
 
@@ -724,10 +743,7 @@ document.addEventListener("DOMContentLoaded", () => {
         version: 5
       }], { synchronousExecution: true });
       
-      // 作成されたレイヤーを確認
-      const doc = app.activeDocument;
-      const topLayer = doc.layers[0];
-      console.log(`🔧 DEBUG: Created layer - name: "${topLayer.name}", id: ${topLayer.id}`);
+      console.log(`✓ Halation Base layer created`);
       
       // 2) 2階調化を適用
       await action.batchPlay([{
@@ -771,9 +787,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }], { synchronousExecution: true });
       
-      // 作成されたレイヤーを確認
-      const colorLayer = app.activeDocument.layers[0];
-      console.log(`🔧 DEBUG: Created color layer - name: "${colorLayer.name}", id: ${colorLayer.id}`);
+      console.log(`✓ Halation Color layer created`);
       
       // 6) 塗りつぶしレイヤーの描画モードをオーバーレイに変更
       await action.batchPlay([{
