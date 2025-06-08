@@ -495,11 +495,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }], { synchronousExecution: true });
       
-      // 作成したグループを返す（最上位レイヤーが新しく作成されたグループ）
-      const newGroup = doc.layers[0];
-      console.log(`✅ Created new Film Effects group - id: ${newGroup.id}, name: "${newGroup.name}"`);
-      console.log(`🔧 DEBUG: New group position: index 0 of ${doc.layers.length} layers`);
-      return newGroup;
+      // 作成したグループを正しく取得
+      console.log("🔧 DEBUG: Searching for newly created Film Effects group...");
+      
+      // グループ作成後に再度検索して正しいグループを見つける
+      for (const layer of doc.layers) {
+        console.log(`🔧 DEBUG: Checking layer - id: ${layer.id}, name: "${layer.name}", kind: ${layer.kind}`);
+        if (layer.kind === constants.LayerKind.GROUP && layer.name === "Film Effects") {
+          console.log(`✅ Found correct Film Effects group - id: ${layer.id}, name: "${layer.name}"`);
+          return layer;
+        }
+      }
+      
+      console.error("❌ Could not find created Film Effects group!");
+      return null;
       
     } catch (e) {
       console.error("getOrCreateFilmEffectsGroup error:", e);
