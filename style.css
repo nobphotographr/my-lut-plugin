@@ -11,14 +11,14 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 24px;  /* 40pxから24pxに変更 - 左右24pxの余白を確保 */
+  padding: 0 24px;  /* 左右24pxのパディングで余白を確保 */
   background-color: #3d3d3d;
   color: #fff;
   font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", sans-serif;
   font-size: 15px;
   height: 100%;
   width: 100%;
-  max-width: 320px;  /* 352pxから320pxに変更 - 272px + 48px (左右24px×2) */
+  max-width: 272px;  /* 224px + 48px (左右24px×2) = 272px - ボタン実サイズ + パディング */
   overflow-y: auto;
   box-sizing: border-box;
 }
@@ -33,7 +33,7 @@ html, body {
 
 /* パネルボタンスタイル */
 #initialPanel .panel-button {
-  width: 272px;
+  width: 224px;  /* 272px - 48px (左右24px×2) = 224px - パネル内で左右24pxの余白を確保 */
   height: 40px;
   margin-bottom: 28px;
   background-color: rgb(60, 60, 60);
