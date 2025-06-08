@@ -329,20 +329,61 @@ document.addEventListener("DOMContentLoaded", () => {
       await core.executeAsModal(async () => {
         console.log("🎬 Starting film effects application...");
         
+        // 既存レイヤーのIDを記録（フィルムエフェクト適用前）
+        const doc = app.activeDocument;
+        const existingLayerIds = new Set();
+        
+        console.log("🔧 DEBUG: Recording existing layers before film effects...");
+        for (const layer of doc.layers) {
+          existingLayerIds.add(layer.id);
+          console.log(`🔧 DEBUG: Existing layer - id: ${layer.id}, name: "${layer.name}"`);
+        }
+        
         // Film Effectsグループを取得または作成（１回だけ）
         let filmEffectsGroup = null;
         if (FILM_EFFECTS_CONFIG.organization.useGroups) {
           filmEffectsGroup = await getOrCreateFilmEffectsGroup();
+          // グループのIDも既存レイヤーに追加（移動対象から除外）
+          if (filmEffectsGroup) {
+            existingLayerIds.add(filmEffectsGroup.id);
+          }
+        }
+        
+        // 新規作成されたレイヤーのみをグループに移動する関数
+        async function moveNewLayersToGroup(groupLayer, existingIds) {
+          if (!groupLayer) return;
+          
+          console.log("🔧 DEBUG: Looking for newly created layers...");
+          const currentLayers = app.activeDocument.layers;
+          const newLayers = [];
+          
+          for (const layer of currentLayers) {
+            if (!existingIds.has(layer.id)) {
+              newLayers.push(layer);
+              console.log(`🔧 DEBUG: Found new layer - id: ${layer.id}, name: "${layer.name}"`);
+            }
+          }
+          
+          // 新規レイヤーのみを移動
+          for (const layer of newLayers) {
+            const moved = await moveLayerToGroupById(layer.id, layer.name, groupLayer);
+            if (moved) {
+              console.log(`✅ Moved new layer "${layer.name}" to group`);
+            } else {
+              console.error(`❌ Failed to move new layer "${layer.name}"`);
+            }
+          }
+          
+          return newLayers.length;
         }
         
         // ベースレイヤーを記録（各エフェクトはこのレイヤーを基準に適用）
-        const doc = app.activeDocument;
         let baseLayerName = "Background"; // デフォルト値
         
         try {
           if (doc.layers && doc.layers.length > 0) {
-            // アクティブレイヤーがない場合は最初のレイヤーを使用
-            baseLayerName = doc.activeLayer ? doc.activeLayer.name : doc.layers[0].name;
+            // 最初のレイヤーを使用
+            baseLayerName = doc.layers[0].name;
           }
         } catch (e) {
           console.log("レイヤー名取得エラー、デフォルト値使用:", e.message);
@@ -355,20 +396,6 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("✨ Applying halation effect...");
           await selectBottomLayer();
           await applyHalationEffect();
-          
-          // レイヤーを同じグループに移動
-          if (filmEffectsGroup) {
-            console.log("🔧 DEBUG: Moving Halation layers to group...");
-            const colorMoved = await moveLayerToGroup("Halation Color", filmEffectsGroup);
-            const baseMoved = await moveLayerToGroup("Halation Base", filmEffectsGroup);
-            
-            if (!colorMoved || !baseMoved) {
-              console.error("❌ Failed to move Halation layers to group");
-              console.error(`❌ Halation Color moved: ${colorMoved}, Halation Base moved: ${baseMoved}`);
-            } else {
-              console.log("✅ Successfully moved all Halation layers to group");
-            }
-          }
         }
         
         // Dreamy Haze効果
@@ -376,21 +403,6 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("🌙 Applying dreamy haze effect...");
           await selectBottomLayer();
           await applyDreamyHazeEffect();
-          
-          // レイヤーを同じグループに移動
-          if (filmEffectsGroup) {
-            console.log("🔧 DEBUG: Moving Dreamy Haze layers to group...");
-            const gradientMoved = await moveLayerToGroup("Gradient Map Adjust", filmEffectsGroup);
-            const toneMoved = await moveLayerToGroup("Tone Curve Adjust", filmEffectsGroup);
-            const blurMoved = await moveLayerToGroup("Blur Screen", filmEffectsGroup);
-            
-            if (!gradientMoved || !toneMoved || !blurMoved) {
-              console.error("❌ Failed to move Dreamy Haze layers to group");
-              console.error(`❌ Gradient: ${gradientMoved}, Tone: ${toneMoved}, Blur: ${blurMoved}`);
-            } else {
-              console.log("✅ Successfully moved all Dreamy Haze layers to group");
-            }
-          }
         }
         
         // 暗部グレイン効果
@@ -398,18 +410,13 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("📽️ Applying dark grain effect...");
           await selectBottomLayer();
           await applyDarkGrainEffect();
-          
-          // レイヤーを同じグループに移動
-          if (filmEffectsGroup) {
-            console.log("🔧 DEBUG: Moving Dark Grain layer to group...");
-            const grainMoved = await moveLayerToGroup("Dark Grain", filmEffectsGroup);
-            
-            if (!grainMoved) {
-              console.error("❌ Failed to move Dark Grain layer to group");
-            } else {
-              console.log("✅ Successfully moved Dark Grain layer to group");
-            }
-          }
+        }
+        
+        // 🎯 すべてのエフェクト適用後、新規作成されたレイヤーのみをグループに移動
+        if (filmEffectsGroup) {
+          console.log("🔧 DEBUG: Moving only newly created film effect layers to group...");
+          const movedCount = await moveNewLayersToGroup(filmEffectsGroup, existingLayerIds);
+          console.log(`✅ Successfully moved ${movedCount} newly created film effect layers to group`);
         }
         
         console.log("🎉 All film effects applied successfully!");
@@ -478,6 +485,47 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("getOrCreateFilmEffectsGroup error:", e);
       return null;
+    }
+  }
+
+  // ── レイヤーをIDでグループに移動する関数 ──
+  async function moveLayerToGroupById(layerId, layerName, groupLayer) {
+    console.log(`🔧 DEBUG: moveLayerToGroupById starting - id: ${layerId}, name: "${layerName}", group: "${groupLayer?.name}"`);
+    
+    try {
+      if (!groupLayer) {
+        console.error("❌ moveLayerToGroupById: groupLayer is null");
+        return false;
+      }
+      
+      console.log(`🔧 DEBUG: Group info - id: ${groupLayer.id}, name: "${groupLayer.name}"`);
+      
+      // レイヤーをIDで選択
+      console.log(`🔧 DEBUG: Selecting layer by ID: ${layerId}`);
+      await action.batchPlay([{
+        _obj: "select",
+        _target: [{ _ref: "layer", _id: layerId }]
+      }], { synchronousExecution: true });
+      
+      console.log(`🔧 DEBUG: Layer selected successfully`);
+      
+      // グループレイヤーのIDを使用して移動
+      console.log(`🔧 DEBUG: Moving layer to group (group id: ${groupLayer.id})`);
+      await action.batchPlay([{
+        _obj: "move",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: { _ref: "layer", _id: groupLayer.id },
+        adjustment: false,
+        version: 5
+      }], { synchronousExecution: true });
+      
+      console.log(`✅ Successfully moved layer "${layerName}" to group "${groupLayer.name}"`);
+      return true;
+      
+    } catch (e) {
+      console.error(`❌ moveLayerToGroupById error for "${layerName}":`, e);
+      console.error(`❌ Error details: ${e.message}`);
+      return false;
     }
   }
 
