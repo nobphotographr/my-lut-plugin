@@ -339,38 +339,70 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log(`🔧 DEBUG: Existing layer - id: ${layer.id}, name: "${layer.name}"`);
         }
         
-        // 新規作成されたレイヤーのみをグループに移動する関数
+        // 再グループ化戦略による確実なレイヤー移動関数
         async function moveNewLayersToGroup(groupLayer, existingIds) {
-          if (!groupLayer) return;
+          if (!groupLayer) return 0;
           
           console.log("🔧 DEBUG: Looking for newly created layers...");
           const currentLayers = app.activeDocument.layers;
           const newLayers = [];
           
           for (const layer of currentLayers) {
-            if (!existingIds.has(layer.id)) {
+            if (!existingIds.has(layer.id) && layer.id !== groupLayer.id) {
               newLayers.push(layer);
               console.log(`🔧 DEBUG: Found new layer - id: ${layer.id}, name: "${layer.name}"`);
             }
           }
           
-          // 新規レイヤーのみを移動（グループ自体は除外）
-          for (const layer of newLayers) {
-            // Film Effectsグループ自体は移動対象から除外
-            if (layer.id === groupLayer.id) {
-              console.log(`🔧 DEBUG: Skipping group itself - id: ${layer.id}, name: "${layer.name}"`);
-              continue;
-            }
-            
-            const moved = await moveLayerToGroupById(layer.id, layer.name, groupLayer);
-            if (moved) {
-              console.log(`✅ Moved new layer "${layer.name}" to group`);
-            } else {
-              console.error(`❌ Failed to move new layer "${layer.name}"`);
-            }
+          if (newLayers.length === 0) {
+            console.log("🔧 DEBUG: No new layers to move");
+            return 0;
           }
           
-          return newLayers.length;
+          console.log(`🔧 DEBUG: Implementing re-grouping strategy for ${newLayers.length} layers...`);
+          
+          try {
+            // 既存グループのプロパティを保存
+            const groupProps = {
+              name: groupLayer.name,
+              opacity: groupLayer.opacity,
+              blendMode: groupLayer.blendMode,
+              visible: groupLayer.visible
+            };
+            
+            console.log(`🔧 DEBUG: Saved group properties - name: "${groupProps.name}"`);
+            
+            // 既存グループの子レイヤーを取得
+            const existingChildren = Array.from(groupLayer.layers || []);
+            console.log(`🔧 DEBUG: Found ${existingChildren.length} existing children in group`);
+            
+            // 新しいグループに含める全レイヤーの配列を作成（新規レイヤーを追加）
+            const combinedLayers = [...existingChildren, ...newLayers];
+            console.log(`🔧 DEBUG: Combined layers total: ${combinedLayers.length}`);
+            
+            // 元のグループを削除
+            console.log(`🔧 DEBUG: Deleting original group...`);
+            await groupLayer.delete();
+            
+            // 新しいグループを作成
+            console.log(`🔧 DEBUG: Creating new group with ${combinedLayers.length} layers...`);
+            const newGroup = await app.activeDocument.createLayerGroup({
+              name: groupProps.name,
+              fromLayers: combinedLayers,
+              opacity: groupProps.opacity,
+              blendMode: groupProps.blendMode
+            });
+            
+            // 可視性を再適用
+            newGroup.visible = groupProps.visible;
+            
+            console.log(`✅ Successfully re-grouped ${newLayers.length} new layers into "${groupProps.name}"`);
+            return newLayers.length;
+            
+          } catch (e) {
+            console.error(`❌ Re-grouping strategy failed:`, e);
+            return 0;
+          }
         }
         
         // ベースレイヤーを記録（各エフェクトはこのレイヤーを基準に適用）
@@ -522,97 +554,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ── レイヤーをIDでグループに移動する関数 ──
-  async function moveLayerToGroupById(layerId, layerName, groupLayer) {
-    console.log(`🔧 DEBUG: moveLayerToGroupById starting - id: ${layerId}, name: "${layerName}", group: "${groupLayer?.name}"`);
-    
-    try {
-      if (!groupLayer) {
-        console.error("❌ moveLayerToGroupById: groupLayer is null");
-        return false;
-      }
-      
-      console.log(`🔧 DEBUG: Group info - id: ${groupLayer.id}, name: "${groupLayer.name}"`);
-      
-      // 修正されたbatchPlay: 正確なレイヤーIDとlayerSection参照を使用
-      console.log(`🔧 DEBUG: Moving layer ${layerId} to layerSection ${groupLayer.id}`);
-      await action.batchPlay([{
-        _obj: "move",
-        _target: [{ _ref: "layer", _id: layerId }],
-        to: { _ref: "layerSection", _id: groupLayer.id },
-        adjustment: false,
-        version: 5
-      }], { synchronousExecution: true });
-      
-      console.log(`✅ Successfully moved layer "${layerName}" to group "${groupLayer.name}"`);
-      return true;
-      
-    } catch (e) {
-      console.error(`❌ moveLayerToGroupById error for "${layerName}":`, e);
-      console.error(`❌ Error details: ${e.message}`);
-      return false;
-    }
-  }
+  // 注: BatchPlay moveは信頼性が低いため、再グループ化戦略に移行
 
-  // ── レイヤーをグループに移動する関数（グループレイヤーオブジェクト版） ──
-  async function moveLayerToGroup(layerName, groupLayer) {
-    console.log(`🔧 DEBUG: moveLayerToGroup starting - layer: "${layerName}", group: "${groupLayer?.name}"`);
-    
-    try {
-      if (!groupLayer) {
-        console.error("❌ moveLayerToGroup: groupLayer is null");
-        return false;
-      }
-      
-      console.log(`🔧 DEBUG: Group info - id: ${groupLayer.id}, name: "${groupLayer.name}"`);
-      
-      // 現在のレイヤー構造をログ出力
-      const currentLayers = app.activeDocument.layers;
-      console.log(`🔧 DEBUG: Current layers count: ${currentLayers.length}`);
-      for (let i = 0; i < Math.min(currentLayers.length, 10); i++) {
-        const layer = currentLayers[i];
-        console.log(`🔧 DEBUG: Layer ${i}: "${layer.name}" (id: ${layer.id}, kind: ${layer.kind})`);
-      }
-      
-      // レイヤーの存在確認
-      const targetLayer = currentLayers.find(layer => layer.name === layerName);
-      if (!targetLayer) {
-        console.error(`❌ Layer "${layerName}" not found in current layers!`);
-        console.error(`❌ Available layers: ${currentLayers.map(l => l.name).join(', ')}`);
-        return false;
-      }
-      
-      console.log(`🔧 DEBUG: Found target layer - id: ${targetLayer.id}, name: "${targetLayer.name}"`);
-      
-      // レイヤーをIDで選択（より確実）
-      console.log(`🔧 DEBUG: Selecting layer by ID: ${targetLayer.id}`);
-      await action.batchPlay([{
-        _obj: "select",
-        _target: [{ _ref: "layer", _id: targetLayer.id }]
-      }], { synchronousExecution: true });
-      
-      console.log(`🔧 DEBUG: Layer selected successfully`);
-      
-      // グループレイヤーのIDを使用して移動
-      console.log(`🔧 DEBUG: Moving layer to group (group id: ${groupLayer.id})`);
-      await action.batchPlay([{
-        _obj: "move",
-        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
-        to: { _ref: "layer", _id: groupLayer.id },
-        adjustment: false,
-        version: 5
-      }], { synchronousExecution: true });
-      
-      console.log(`✅ Successfully moved layer "${layerName}" to group "${groupLayer.name}"`);
-      return true;
-      
-    } catch (e) {
-      console.error(`❌ moveLayerToGroup error for "${layerName}":`, e);
-      console.error(`❌ Error details: ${e.message}`);
-      console.error(`❌ Error stack:`, e.stack);
-      return false;
-    }
-  }
+  // 注: BatchPlay moveは信頼性の問題により削除。再グループ化戦略を使用。
 
   // ── フィルムエフェクト設定ダイアログ関数 ──
   async function showThresholdDialog() {
