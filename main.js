@@ -354,8 +354,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
           
-          // 新規レイヤーのみを移動
+          // 新規レイヤーのみを移動（グループ自体は除外）
           for (const layer of newLayers) {
+            // Film Effectsグループ自体は移動対象から除外
+            if (layer.id === groupLayer.id) {
+              console.log(`🔧 DEBUG: Skipping group itself - id: ${layer.id}, name: "${layer.name}"`);
+              continue;
+            }
+            
             const moved = await moveLayerToGroupById(layer.id, layer.name, groupLayer);
             if (moved) {
               console.log(`✅ Moved new layer "${layer.name}" to group`);
@@ -528,21 +534,12 @@ document.addEventListener("DOMContentLoaded", () => {
       
       console.log(`🔧 DEBUG: Group info - id: ${groupLayer.id}, name: "${groupLayer.name}"`);
       
-      // レイヤーをIDで選択
-      console.log(`🔧 DEBUG: Selecting layer by ID: ${layerId}`);
-      await action.batchPlay([{
-        _obj: "select",
-        _target: [{ _ref: "layer", _id: layerId }]
-      }], { synchronousExecution: true });
-      
-      console.log(`🔧 DEBUG: Layer selected successfully`);
-      
-      // グループレイヤーのIDを使用して移動
-      console.log(`🔧 DEBUG: Moving layer to group (group id: ${groupLayer.id})`);
+      // 修正されたbatchPlay: 正確なレイヤーIDとlayerSection参照を使用
+      console.log(`🔧 DEBUG: Moving layer ${layerId} to layerSection ${groupLayer.id}`);
       await action.batchPlay([{
         _obj: "move",
-        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
-        to: { _ref: "layer", _id: groupLayer.id },
+        _target: [{ _ref: "layer", _id: layerId }],
+        to: { _ref: "layerSection", _id: groupLayer.id },
         adjustment: false,
         version: 5
       }], { synchronousExecution: true });
