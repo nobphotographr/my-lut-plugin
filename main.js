@@ -563,89 +563,131 @@ document.addEventListener("DOMContentLoaded", () => {
     return new Promise((resolve, reject) => {
       const dialog = document.getElementById('thresholdDialog');
       
-      // ハレーション設定の要素
-      const enableHalation = document.getElementById('enableHalation');
-      const thresholdSlider = document.getElementById('thresholdSlider');
-      const thresholdValue = document.getElementById('thresholdValue');
-      const blurRadiusSlider = document.getElementById('blurRadiusSlider');
-      const blurRadiusValue = document.getElementById('blurRadiusValue');
+      try {
+        console.log("🔧 DEBUG: Creating custom sliders...");
+        
+        // カスタムスライダーのインスタンスを保持
+        const sliders = {};
+        
+        // ハレーション設定のスライダー
+        const thresholdContainer = document.getElementById('thresholdSliderContainer');
+        console.log("🔧 DEBUG: thresholdContainer:", thresholdContainer);
+        
+        sliders.threshold = new CustomSlider(
+          thresholdContainer,
+          {
+            label: '閾値',
+            min: 100,
+            max: 250,
+            step: 5,
+            value: FILM_EFFECTS_CONFIG.halation.threshold
+          }
+        );
+        console.log("🔧 DEBUG: threshold slider created");
       
-      // Dreamy Haze設定の要素
+        sliders.blurRadius = new CustomSlider(
+          document.getElementById('blurRadiusSliderContainer'),
+          {
+            label: 'ぼかし半径 (px)',
+            min: 10,
+            max: 100,
+            step: 5,
+            value: FILM_EFFECTS_CONFIG.halation.blurRadius
+          }
+        );
+        console.log("🔧 DEBUG: blurRadius slider created");
+      
+        // Dreamy Haze設定のスライダー
+        sliders.dreamyBlurRadius = new CustomSlider(
+          document.getElementById('dreamyBlurRadiusSliderContainer'),
+          {
+            label: 'ぼかし半径 (px)',
+            min: 10,
+            max: 100,
+            step: 5,
+            value: FILM_EFFECTS_CONFIG.dreamyHaze.blur.radius
+          }
+        );
+        console.log("🔧 DEBUG: dreamyBlurRadius slider created");
+        
+        sliders.dreamyBlurOpacity = new CustomSlider(
+          document.getElementById('dreamyBlurOpacitySliderContainer'),
+          {
+            label: 'ぼかしレイヤー不透明度 (%)',
+            min: 0,
+            max: 100,
+            step: 5,
+            value: FILM_EFFECTS_CONFIG.dreamyHaze.blur.opacity
+          }
+        );
+        console.log("🔧 DEBUG: dreamyBlurOpacity slider created");
+        
+        sliders.dreamyGradientOpacity = new CustomSlider(
+          document.getElementById('dreamyGradientOpacitySliderContainer'),
+          {
+            label: 'グラデーションマップ不透明度 (%)',
+            min: 0,
+            max: 50,
+            step: 1,
+            value: FILM_EFFECTS_CONFIG.dreamyHaze.gradientMap.opacity
+          }
+        );
+        console.log("🔧 DEBUG: dreamyGradientOpacity slider created");
+      
+        // 暗部グレイン設定のスライダー
+        sliders.shadowThreshold = new CustomSlider(
+          document.getElementById('shadowThresholdSliderContainer'),
+          {
+            label: '暗部しきい値',
+            min: 0,
+            max: 255,
+            step: 5,
+            value: FILM_EFFECTS_CONFIG.darkGrain.shadowThreshold
+          }
+        );
+        console.log("🔧 DEBUG: shadowThreshold slider created");
+        
+        sliders.grainAmount = new CustomSlider(
+          document.getElementById('grainAmountSliderContainer'),
+          {
+            label: 'グレイン量 (%)',
+            min: 1,
+            max: 50,
+            step: 1,
+            value: FILM_EFFECTS_CONFIG.darkGrain.grainAmount
+          }
+        );
+        console.log("🔧 DEBUG: grainAmount slider created");
+        
+        sliders.featherRadius = new CustomSlider(
+          document.getElementById('featherRadiusSliderContainer'),
+          {
+            label: 'マスクのフェザー (px)',
+            min: 0,
+            max: 50,
+            step: 2,
+            value: FILM_EFFECTS_CONFIG.darkGrain.featherRadius
+          }
+        );
+        console.log("🔧 DEBUG: featherRadius slider created");
+        console.log("🔧 DEBUG: All sliders created successfully");
+      
+      // チェックボックス要素の取得
+      const enableHalation = document.getElementById('enableHalation');
       const enableDreamyHaze = document.getElementById('enableDreamyHaze');
-      const dreamyBlurRadiusSlider = document.getElementById('dreamyBlurRadiusSlider');
-      const dreamyBlurRadiusValue = document.getElementById('dreamyBlurRadiusValue');
-      const dreamyBlurOpacitySlider = document.getElementById('dreamyBlurOpacitySlider');
-      const dreamyBlurOpacityValue = document.getElementById('dreamyBlurOpacityValue');
       const dreamyToneCurve = document.getElementById('dreamyToneCurve');
       const dreamyGradientMap = document.getElementById('dreamyGradientMap');
-      const dreamyGradientOpacitySlider = document.getElementById('dreamyGradientOpacitySlider');
-      const dreamyGradientOpacityValue = document.getElementById('dreamyGradientOpacityValue');
-      
-      // グレイン設定の要素
       const enableDarkGrain = document.getElementById('enableDarkGrain');
-      const shadowThresholdSlider = document.getElementById('shadowThresholdSlider');
-      const shadowThresholdValue = document.getElementById('shadowThresholdValue');
-      const grainAmountSlider = document.getElementById('grainAmountSlider');
-      const grainAmountValue = document.getElementById('grainAmountValue');
-      const featherRadiusSlider = document.getElementById('featherRadiusSlider');
-      const featherRadiusValue = document.getElementById('featherRadiusValue');
       
       const cancelBtn = document.getElementById('cancelBtn');
       const applyBtn = document.getElementById('applyBtn');
       
-      // 現在の値を設定
+      // チェックボックスの初期値を設定
       enableHalation.checked = FILM_EFFECTS_CONFIG.halation.enabled;
-      thresholdSlider.value = FILM_EFFECTS_CONFIG.halation.threshold;
-      thresholdValue.textContent = FILM_EFFECTS_CONFIG.halation.threshold;
-      blurRadiusSlider.value = FILM_EFFECTS_CONFIG.halation.blurRadius;
-      blurRadiusValue.textContent = FILM_EFFECTS_CONFIG.halation.blurRadius;
-      
       enableDreamyHaze.checked = FILM_EFFECTS_CONFIG.dreamyHaze.enabled;
-      dreamyBlurRadiusSlider.value = FILM_EFFECTS_CONFIG.dreamyHaze.blur.radius;
-      dreamyBlurRadiusValue.textContent = FILM_EFFECTS_CONFIG.dreamyHaze.blur.radius;
-      dreamyBlurOpacitySlider.value = FILM_EFFECTS_CONFIG.dreamyHaze.blur.opacity;
-      dreamyBlurOpacityValue.textContent = FILM_EFFECTS_CONFIG.dreamyHaze.blur.opacity;
       dreamyToneCurve.checked = FILM_EFFECTS_CONFIG.dreamyHaze.toneCurve.enabled;
       dreamyGradientMap.checked = FILM_EFFECTS_CONFIG.dreamyHaze.gradientMap.enabled;
-      dreamyGradientOpacitySlider.value = FILM_EFFECTS_CONFIG.dreamyHaze.gradientMap.opacity;
-      dreamyGradientOpacityValue.textContent = FILM_EFFECTS_CONFIG.dreamyHaze.gradientMap.opacity;
-      
       enableDarkGrain.checked = FILM_EFFECTS_CONFIG.darkGrain.enabled;
-      shadowThresholdSlider.value = FILM_EFFECTS_CONFIG.darkGrain.shadowThreshold;
-      shadowThresholdValue.textContent = FILM_EFFECTS_CONFIG.darkGrain.shadowThreshold;
-      grainAmountSlider.value = FILM_EFFECTS_CONFIG.darkGrain.grainAmount;
-      grainAmountValue.textContent = FILM_EFFECTS_CONFIG.darkGrain.grainAmount;
-      featherRadiusSlider.value = FILM_EFFECTS_CONFIG.darkGrain.featherRadius;
-      featherRadiusValue.textContent = FILM_EFFECTS_CONFIG.darkGrain.featherRadius;
-      
-      // スライダーの値更新イベントリスナーを設定
-      const sliders = [
-        { slider: thresholdSlider, valueDisplay: thresholdValue },
-        { slider: blurRadiusSlider, valueDisplay: blurRadiusValue },
-        { slider: dreamyBlurRadiusSlider, valueDisplay: dreamyBlurRadiusValue },
-        { slider: dreamyBlurOpacitySlider, valueDisplay: dreamyBlurOpacityValue },
-        { slider: dreamyGradientOpacitySlider, valueDisplay: dreamyGradientOpacityValue },
-        { slider: shadowThresholdSlider, valueDisplay: shadowThresholdValue },
-        { slider: grainAmountSlider, valueDisplay: grainAmountValue },
-        { slider: featherRadiusSlider, valueDisplay: featherRadiusValue }
-      ];
-      
-      sliders.forEach(({ slider, valueDisplay }) => {
-        // スライダーのスタイルを強制適用
-        slider.style.webkitAppearance = 'none';
-        slider.style.mozAppearance = 'none';
-        slider.style.appearance = 'none';
-        slider.style.height = '4px';
-        slider.style.background = '#4a4a4a';
-        slider.style.borderRadius = '2px';
-        slider.style.outline = 'none';
-        slider.style.margin = '10px 0';
-        slider.style.cursor = 'pointer';
-        
-        slider.addEventListener('input', (e) => {
-          valueDisplay.textContent = e.target.value;
-        });
-      });
       
       // キャンセルボタン
       const handleCancel = () => {
@@ -661,22 +703,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const settings = {
           // ハレーション設定
           halationEnabled: enableHalation.checked,
-          threshold: parseInt(thresholdSlider.value),
-          blurRadius: parseInt(blurRadiusSlider.value),
+          threshold: sliders.threshold.value,
+          blurRadius: sliders.blurRadius.value,
           // Dreamy Haze設定
           dreamyHaze: {
             enabled: enableDreamyHaze.checked,
-            blurRadius: parseInt(dreamyBlurRadiusSlider.value),
-            blurOpacity: parseInt(dreamyBlurOpacitySlider.value),
+            blurRadius: sliders.dreamyBlurRadius.value,
+            blurOpacity: sliders.dreamyBlurOpacity.value,
             enableToneCurve: dreamyToneCurve.checked,
             enableGradientMap: dreamyGradientMap.checked,
-            gradientMapOpacity: parseInt(dreamyGradientOpacitySlider.value)
+            gradientMapOpacity: sliders.dreamyGradientOpacity.value
           },
           // グレイン設定
           darkGrainEnabled: enableDarkGrain.checked,
-          shadowThreshold: parseInt(shadowThresholdSlider.value),
-          grainAmount: parseInt(grainAmountSlider.value),
-          featherRadius: parseInt(featherRadiusSlider.value)
+          shadowThreshold: sliders.shadowThreshold.value,
+          grainAmount: sliders.grainAmount.value,
+          featherRadius: sliders.featherRadius.value
         };
         
         console.log("適用ボタンがクリックされました:", settings);
@@ -695,6 +737,9 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // イベントリスナーのクリーンアップ
       const cleanup = () => {
+        // カスタムスライダーのクリーンアップ
+        Object.values(sliders).forEach(slider => slider.destroy());
+        
         cancelBtn.removeEventListener('click', handleCancel);
         applyBtn.removeEventListener('click', handleApply);
         form.removeEventListener('submit', handleSubmit);
@@ -713,9 +758,14 @@ document.addEventListener("DOMContentLoaded", () => {
       
       dialog.addEventListener('close', handleDialogClose);
       
-      // ダイアログを表示
-      console.log("ダイアログを表示します");
-      dialog.showModal();
+        // ダイアログを表示
+        console.log("ダイアログを表示します");
+        dialog.showModal();
+        
+      } catch (error) {
+        console.error("🔧 DEBUG: showThresholdDialog error:", error);
+        reject(error);
+      }
     });
   }
 
@@ -1395,4 +1445,235 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error(`レイヤー削除処理に失敗: ${error.message}`);
     }
   }
+
+// ── カスタムスライダークラス ──
+class CustomSlider {
+  constructor(container, options = {}) {
+    this.container = container;
+    this.min = options.min || 0;
+    this.max = options.max || 100;
+    this.step = options.step || 1;
+    this.value = options.value || 50;
+    this.label = options.label || '';
+    this.onChange = options.onChange || (() => {});
+    this.onInput = options.onInput || (() => {});
+    
+    this.isDragging = false;
+    this.pointerId = null;
+    
+    this.init();
+  }
+    
+  init() {
+    if (!this.container) {
+      throw new Error('CustomSlider: container is required');
+    }
+    
+    // UXP環境対応: JavaScriptで直接DOM要素を構築
+    console.log("🔧 DEBUG: Creating slider elements programmatically...");
+    
+    // メインのラッパー要素
+    this.wrapper = document.createElement('div');
+    this.wrapper.className = 'custom-slider-wrapper';
+    
+    // ヘッダー部分
+    const sliderHeader = document.createElement('div');
+    sliderHeader.className = 'slider-header';
+    
+    this.labelElement = document.createElement('label');
+    this.labelElement.className = 'slider-label';
+    
+    this.valueDisplay = document.createElement('span');
+    this.valueDisplay.className = 'slider-value';
+    this.valueDisplay.textContent = '0';
+    
+    sliderHeader.appendChild(this.labelElement);
+    sliderHeader.appendChild(this.valueDisplay);
+    
+    // スライダーコンテナ
+    this.sliderContainer = document.createElement('div');
+    this.sliderContainer.className = 'custom-slider-container';
+    this.sliderContainer.setAttribute('role', 'slider');
+    this.sliderContainer.setAttribute('tabindex', '0');
+    
+    // トラック
+    this.track = document.createElement('div');
+    this.track.className = 'slider-track';
+    
+    // フィル
+    this.fill = document.createElement('div');
+    this.fill.className = 'slider-fill';
+    
+    // ハンドル
+    this.handle = document.createElement('div');
+    this.handle.className = 'slider-handle';
+    
+    // 要素の組み立て
+    this.track.appendChild(this.fill);
+    this.track.appendChild(this.handle);
+    this.sliderContainer.appendChild(this.track);
+    this.wrapper.appendChild(sliderHeader);
+    this.wrapper.appendChild(this.sliderContainer);
+    
+    console.log("🔧 DEBUG: Elements created successfully");
+    
+    // 初期設定
+    this.labelElement.textContent = this.label;
+    this.sliderContainer.setAttribute('aria-label', this.label);
+    this.sliderContainer.setAttribute('aria-valuemin', this.min);
+    this.sliderContainer.setAttribute('aria-valuemax', this.max);
+    
+    // コンテナに追加
+    this.container.appendChild(this.wrapper);
+    
+    // 初期値を設定
+    this.setValue(this.value);
+    
+    // イベントリスナーを設定
+    this.bindEvents();
+  }
+    
+    bindEvents() {
+      // ポインターイベント
+      this.handle.addEventListener('pointerdown', this.onPointerDown.bind(this));
+      this.track.addEventListener('pointerdown', this.onTrackClick.bind(this));
+      
+      // キーボードイベント
+      this.sliderContainer.addEventListener('keydown', this.onKeyDown.bind(this));
+    }
+    
+  onPointerDown(e) {
+    e.preventDefault();
+    this.isDragging = true;
+    this.pointerId = e.pointerId;
+    
+    // ポインターキャプチャを設定
+    this.handle.setPointerCapture(this.pointerId);
+    
+    // グローバルイベントリスナーを追加
+    this.handle.addEventListener('pointermove', this.boundPointerMove = this.onPointerMove.bind(this));
+    this.handle.addEventListener('pointerup', this.boundPointerUp = this.onPointerUp.bind(this));
+    this.handle.addEventListener('pointercancel', this.boundPointerUp);
+  }
+    
+  onPointerMove(e) {
+    if (!this.isDragging) return;
+    
+    e.preventDefault();
+    const rect = this.track.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const percent = x / rect.width;
+    const rawValue = this.min + (this.max - this.min) * percent;
+    
+    // ステップに合わせて値を調整
+    const steppedValue = Math.round(rawValue / this.step) * this.step;
+    const clampedValue = Math.max(this.min, Math.min(this.max, steppedValue));
+    
+    this.updateValue(clampedValue);
+  }
+  
+  onPointerUp(e) {
+    if (!this.isDragging) return;
+    
+    this.isDragging = false;
+    
+    // ポインターキャプチャを解放
+    this.handle.releasePointerCapture(this.pointerId);
+    
+    // イベントリスナーを削除
+    this.handle.removeEventListener('pointermove', this.boundPointerMove);
+    this.handle.removeEventListener('pointerup', this.boundPointerUp);
+    this.handle.removeEventListener('pointercancel', this.boundPointerUp);
+    
+    // 最終的な値でchangeイベントを発火
+    this.onChange(this.value);
+  }
+    
+    onTrackClick(e) {
+      if (e.target === this.handle) return;
+      
+      const rect = this.track.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percent = Math.max(0, Math.min(x / rect.width, 1));
+      const rawValue = this.min + (this.max - this.min) * percent;
+      
+      // ステップに合わせて値を調整
+      const steppedValue = Math.round(rawValue / this.step) * this.step;
+      const clampedValue = Math.max(this.min, Math.min(this.max, steppedValue));
+      
+      this.setValue(clampedValue);
+      this.onChange(this.value);
+    }
+    
+    onKeyDown(e) {
+      let newValue = this.value;
+      const largeStep = this.step * 10;
+      
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'ArrowDown':
+          newValue = Math.max(this.min, this.value - this.step);
+          e.preventDefault();
+          break;
+        case 'ArrowRight':
+        case 'ArrowUp':
+          newValue = Math.min(this.max, this.value + this.step);
+          e.preventDefault();
+          break;
+        case 'Home':
+          newValue = this.min;
+          e.preventDefault();
+          break;
+        case 'End':
+          newValue = this.max;
+          e.preventDefault();
+          break;
+        case 'PageUp':
+          newValue = Math.min(this.max, this.value + largeStep);
+          e.preventDefault();
+          break;
+        case 'PageDown':
+          newValue = Math.max(this.min, this.value - largeStep);
+          e.preventDefault();
+          break;
+        default:
+          return;
+      }
+      
+      if (newValue !== this.value) {
+        this.setValue(newValue);
+        this.onChange(this.value);
+      }
+    }
+    
+    updateValue(value) {
+      if (this.value !== value) {
+        this.value = value;
+        this.updateUI();
+        this.onInput(value);
+      }
+    }
+    
+    setValue(value) {
+      this.value = Math.max(this.min, Math.min(this.max, value));
+      this.updateUI();
+    }
+    
+    updateUI() {
+      const percent = ((this.value - this.min) / (this.max - this.min)) * 100;
+      
+      // ハンドルとフィルの位置を更新
+      this.handle.style.left = `${percent}%`;
+      this.fill.style.width = `${percent}%`;
+      
+      // 値表示とARIA属性を更新
+      this.valueDisplay.textContent = this.value;
+      this.sliderContainer.setAttribute('aria-valuenow', this.value);
+    }
+    
+  destroy() {
+    // クリーンアップ
+    this.wrapper.remove();
+  }
+}
 });
