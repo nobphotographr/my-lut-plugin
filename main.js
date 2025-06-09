@@ -219,9 +219,9 @@ document.addEventListener("DOMContentLoaded", () => {
       name: "Dreamy Haze",
       // メインのぼかし効果
       blur: {
-        radius: 50,
+        radius: 30,
         blendMode: "screen",
-        opacity: 90
+        opacity: 20
       },
       // トーンカーブ（フェード効果）
       toneCurve: {
@@ -565,44 +565,87 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // ハレーション設定の要素
       const enableHalation = document.getElementById('enableHalation');
-      const thresholdInput = document.getElementById('thresholdInput');
-      const blurRadiusInput = document.getElementById('blurRadiusInput');
+      const thresholdSlider = document.getElementById('thresholdSlider');
+      const thresholdValue = document.getElementById('thresholdValue');
+      const blurRadiusSlider = document.getElementById('blurRadiusSlider');
+      const blurRadiusValue = document.getElementById('blurRadiusValue');
       
       // Dreamy Haze設定の要素
       const enableDreamyHaze = document.getElementById('enableDreamyHaze');
-      const dreamyBlurRadiusInput = document.getElementById('dreamyBlurRadiusInput');
-      const dreamyBlurOpacityInput = document.getElementById('dreamyBlurOpacityInput');
+      const dreamyBlurRadiusSlider = document.getElementById('dreamyBlurRadiusSlider');
+      const dreamyBlurRadiusValue = document.getElementById('dreamyBlurRadiusValue');
+      const dreamyBlurOpacitySlider = document.getElementById('dreamyBlurOpacitySlider');
+      const dreamyBlurOpacityValue = document.getElementById('dreamyBlurOpacityValue');
       const dreamyToneCurve = document.getElementById('dreamyToneCurve');
       const dreamyGradientMap = document.getElementById('dreamyGradientMap');
-      const dreamyGradientOpacityInput = document.getElementById('dreamyGradientOpacityInput');
+      const dreamyGradientOpacitySlider = document.getElementById('dreamyGradientOpacitySlider');
+      const dreamyGradientOpacityValue = document.getElementById('dreamyGradientOpacityValue');
       
       // グレイン設定の要素
       const enableDarkGrain = document.getElementById('enableDarkGrain');
-      const shadowThresholdInput = document.getElementById('shadowThresholdInput');
-      const grainAmountInput = document.getElementById('grainAmountInput');
-      const featherRadiusInput = document.getElementById('featherRadiusInput');
+      const shadowThresholdSlider = document.getElementById('shadowThresholdSlider');
+      const shadowThresholdValue = document.getElementById('shadowThresholdValue');
+      const grainAmountSlider = document.getElementById('grainAmountSlider');
+      const grainAmountValue = document.getElementById('grainAmountValue');
+      const featherRadiusSlider = document.getElementById('featherRadiusSlider');
+      const featherRadiusValue = document.getElementById('featherRadiusValue');
       
       const cancelBtn = document.getElementById('cancelBtn');
       const applyBtn = document.getElementById('applyBtn');
       
       // 現在の値を設定
       enableHalation.checked = FILM_EFFECTS_CONFIG.halation.enabled;
-      thresholdInput.value = FILM_EFFECTS_CONFIG.halation.threshold;
-      blurRadiusInput.value = FILM_EFFECTS_CONFIG.halation.blurRadius;
+      thresholdSlider.value = FILM_EFFECTS_CONFIG.halation.threshold;
+      thresholdValue.textContent = FILM_EFFECTS_CONFIG.halation.threshold;
+      blurRadiusSlider.value = FILM_EFFECTS_CONFIG.halation.blurRadius;
+      blurRadiusValue.textContent = FILM_EFFECTS_CONFIG.halation.blurRadius;
       
       enableDreamyHaze.checked = FILM_EFFECTS_CONFIG.dreamyHaze.enabled;
-      dreamyBlurRadiusInput.value = FILM_EFFECTS_CONFIG.dreamyHaze.blur.radius;
-      dreamyBlurOpacityInput.value = FILM_EFFECTS_CONFIG.dreamyHaze.blur.opacity;
+      dreamyBlurRadiusSlider.value = FILM_EFFECTS_CONFIG.dreamyHaze.blur.radius;
+      dreamyBlurRadiusValue.textContent = FILM_EFFECTS_CONFIG.dreamyHaze.blur.radius;
+      dreamyBlurOpacitySlider.value = FILM_EFFECTS_CONFIG.dreamyHaze.blur.opacity;
+      dreamyBlurOpacityValue.textContent = FILM_EFFECTS_CONFIG.dreamyHaze.blur.opacity;
       dreamyToneCurve.checked = FILM_EFFECTS_CONFIG.dreamyHaze.toneCurve.enabled;
       dreamyGradientMap.checked = FILM_EFFECTS_CONFIG.dreamyHaze.gradientMap.enabled;
-      dreamyGradientOpacityInput.value = FILM_EFFECTS_CONFIG.dreamyHaze.gradientMap.opacity;
+      dreamyGradientOpacitySlider.value = FILM_EFFECTS_CONFIG.dreamyHaze.gradientMap.opacity;
+      dreamyGradientOpacityValue.textContent = FILM_EFFECTS_CONFIG.dreamyHaze.gradientMap.opacity;
       
       enableDarkGrain.checked = FILM_EFFECTS_CONFIG.darkGrain.enabled;
-      shadowThresholdInput.value = FILM_EFFECTS_CONFIG.darkGrain.shadowThreshold;
-      grainAmountInput.value = FILM_EFFECTS_CONFIG.darkGrain.grainAmount;
-      featherRadiusInput.value = FILM_EFFECTS_CONFIG.darkGrain.featherRadius;
+      shadowThresholdSlider.value = FILM_EFFECTS_CONFIG.darkGrain.shadowThreshold;
+      shadowThresholdValue.textContent = FILM_EFFECTS_CONFIG.darkGrain.shadowThreshold;
+      grainAmountSlider.value = FILM_EFFECTS_CONFIG.darkGrain.grainAmount;
+      grainAmountValue.textContent = FILM_EFFECTS_CONFIG.darkGrain.grainAmount;
+      featherRadiusSlider.value = FILM_EFFECTS_CONFIG.darkGrain.featherRadius;
+      featherRadiusValue.textContent = FILM_EFFECTS_CONFIG.darkGrain.featherRadius;
       
-      // スライダー関連処理を削除（数値入力フィールドに変更のため）
+      // スライダーの値更新イベントリスナーを設定
+      const sliders = [
+        { slider: thresholdSlider, valueDisplay: thresholdValue },
+        { slider: blurRadiusSlider, valueDisplay: blurRadiusValue },
+        { slider: dreamyBlurRadiusSlider, valueDisplay: dreamyBlurRadiusValue },
+        { slider: dreamyBlurOpacitySlider, valueDisplay: dreamyBlurOpacityValue },
+        { slider: dreamyGradientOpacitySlider, valueDisplay: dreamyGradientOpacityValue },
+        { slider: shadowThresholdSlider, valueDisplay: shadowThresholdValue },
+        { slider: grainAmountSlider, valueDisplay: grainAmountValue },
+        { slider: featherRadiusSlider, valueDisplay: featherRadiusValue }
+      ];
+      
+      sliders.forEach(({ slider, valueDisplay }) => {
+        // スライダーのスタイルを強制適用
+        slider.style.webkitAppearance = 'none';
+        slider.style.mozAppearance = 'none';
+        slider.style.appearance = 'none';
+        slider.style.height = '4px';
+        slider.style.background = '#4a4a4a';
+        slider.style.borderRadius = '2px';
+        slider.style.outline = 'none';
+        slider.style.margin = '10px 0';
+        slider.style.cursor = 'pointer';
+        
+        slider.addEventListener('input', (e) => {
+          valueDisplay.textContent = e.target.value;
+        });
+      });
       
       // キャンセルボタン
       const handleCancel = () => {
@@ -618,22 +661,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const settings = {
           // ハレーション設定
           halationEnabled: enableHalation.checked,
-          threshold: parseInt(thresholdInput.value),
-          blurRadius: parseInt(blurRadiusInput.value),
+          threshold: parseInt(thresholdSlider.value),
+          blurRadius: parseInt(blurRadiusSlider.value),
           // Dreamy Haze設定
           dreamyHaze: {
             enabled: enableDreamyHaze.checked,
-            blurRadius: parseInt(dreamyBlurRadiusInput.value),
-            blurOpacity: parseInt(dreamyBlurOpacityInput.value),
+            blurRadius: parseInt(dreamyBlurRadiusSlider.value),
+            blurOpacity: parseInt(dreamyBlurOpacitySlider.value),
             enableToneCurve: dreamyToneCurve.checked,
             enableGradientMap: dreamyGradientMap.checked,
-            gradientMapOpacity: parseInt(dreamyGradientOpacityInput.value)
+            gradientMapOpacity: parseInt(dreamyGradientOpacitySlider.value)
           },
           // グレイン設定
           darkGrainEnabled: enableDarkGrain.checked,
-          shadowThreshold: parseInt(shadowThresholdInput.value),
-          grainAmount: parseInt(grainAmountInput.value),
-          featherRadius: parseInt(featherRadiusInput.value)
+          shadowThreshold: parseInt(shadowThresholdSlider.value),
+          grainAmount: parseInt(grainAmountSlider.value),
+          featherRadius: parseInt(featherRadiusSlider.value)
         };
         
         console.log("適用ボタンがクリックされました:", settings);
@@ -738,6 +781,33 @@ document.addEventListener("DOMContentLoaded", () => {
       
       console.log(`✓ Halation Color layer created`);
       
+      // 5.5) レイヤー順序の確認と修正
+      // Halation ColorがHalation Baseの直上にあることを確認
+      const doc = app.activeDocument;
+      let colorLayer = null;
+      let baseLayer = null;
+      
+      // レイヤーを探す
+      for (const layer of doc.layers) {
+        if (layer.name === config.name + " Color") colorLayer = layer;
+        if (layer.name === config.name + " Base") baseLayer = layer;
+      }
+      
+      if (colorLayer && baseLayer) {
+        // レイヤーのインデックスを確認
+        const allLayers = Array.from(doc.layers);
+        const colorIndex = allLayers.indexOf(colorLayer);
+        const baseIndex = allLayers.indexOf(baseLayer);
+        
+        console.log(`🔧 DEBUG: Color layer index: ${colorIndex}, Base layer index: ${baseIndex}`);
+        
+        // Photoshopではインデックスが小さいほど上位
+        if (colorIndex !== baseIndex - 1) {
+          console.log("⚠️ レイヤー順序が正しくありません。修正を試みます...");
+          // 必要に応じてレイヤーを移動するロジックをここに追加
+        }
+      }
+      
       // 6) 塗りつぶしレイヤーの描画モードをオーバーレイに変更
       await action.batchPlay([{
         _obj: "set",
@@ -749,15 +819,52 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }], { synchronousExecution: true });
       
-      // 7) クリッピングマスクを作成（塗りつぶしレイヤーをハレーションベースにクリップ）
-      await action.batchPlay([{
-        _obj: "set",
-        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
-        to: {
-          _obj: "layer",
-          group: true
+      // 6.5) Halation Colorレイヤーを明示的にアクティブにする
+      console.log("🔧 DEBUG: Making Halation Color layer active for clipping mask...");
+      const colorLayerForSelection = app.activeDocument.layers.find(l => l.name === config.name + " Color");
+      if (colorLayerForSelection) {
+        app.activeDocument.activeLayers = [colorLayerForSelection];
+        console.log(`✓ Halation Color layer is now active (id: ${colorLayerForSelection.id})`);
+      }
+      
+      // 7) クリッピングマスクを作成（DOM APIを使用）
+      console.log("Creating clipping mask using DOM API...");
+      
+      // 最新のレイヤー状態を取得
+      const currentDoc = app.activeDocument;
+      let targetColorLayer = null;
+      
+      // Halation Colorレイヤーを探す
+      for (const layer of currentDoc.layers) {
+        if (layer.name === config.name + " Color") {
+          targetColorLayer = layer;
+          break;
         }
-      }], { synchronousExecution: true });
+      }
+      
+      if (targetColorLayer) {
+        try {
+          // DOM APIを使用してクリッピングマスクを設定
+          if (!targetColorLayer.isClippingMask) {
+            targetColorLayer.isClippingMask = true;
+            console.log(`✅ Clipping mask created successfully using DOM API`);
+          } else {
+            console.log(`ℹ️ Layer is already a clipping mask`);
+          }
+        } catch (e) {
+          console.error("DOM API failed, trying batchPlay fallback:", e);
+          
+          // フォールバック: groupEventを使用
+          await action.batchPlay([{
+            _obj: "groupEvent",
+            _target: [{ _ref: "layer", _id: targetColorLayer.id }]
+          }], { synchronousExecution: true });
+          
+          console.log(`✅ Clipping mask created using groupEvent fallback`);
+        }
+      } else {
+        console.error("❌ Could not find Halation Color layer for clipping mask");
+      }
       
       console.log(`✨ Halation effect applied successfully (ExtendScript style)`);
       

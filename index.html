@@ -35,51 +35,75 @@
       <!-- ハレーション設定 -->
       <div class="setting-panel">
         <div class="setting-panel-title">ハレーション設定:</div>
-        <div class="input-group">
-          <label for="thresholdInput">閾値:</label>
-          <input type="number" id="thresholdInput" value="200" min="100" max="250" step="5">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="thresholdSlider">閾値</label>
+            <span class="slider-value" id="thresholdValue">200</span>
+          </div>
+          <input type="range" id="thresholdSlider" class="custom-slider" value="200" min="100" max="250" step="5">
         </div>
-        <div class="input-group">
-          <label for="blurRadiusInput">ぼかし半径 (px):</label>
-          <input type="number" id="blurRadiusInput" value="30" min="10" max="60" step="5">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="blurRadiusSlider">ぼかし半径 (px)</label>
+            <span class="slider-value" id="blurRadiusValue">30</span>
+          </div>
+          <input type="range" id="blurRadiusSlider" class="custom-slider" value="30" min="10" max="60" step="5">
         </div>
       </div>
       
       <!-- Dreamy Haze設定 -->
       <div class="setting-panel">
         <div class="setting-panel-title">Dreamy Haze設定:</div>
-        <div class="input-group">
-          <label for="dreamyBlurRadiusInput">ぼかし半径 (px):</label>
-          <input type="number" id="dreamyBlurRadiusInput" value="50" min="10" max="100" step="5">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="dreamyBlurRadiusSlider">ぼかし半径 (px)</label>
+            <span class="slider-value" id="dreamyBlurRadiusValue">50</span>
+          </div>
+          <input type="range" id="dreamyBlurRadiusSlider" class="custom-slider" value="50" min="10" max="100" step="5">
         </div>
-        <div class="input-group">
-          <label for="dreamyBlurOpacityInput">ぼかしレイヤー不透明度 (%):</label>
-          <input type="number" id="dreamyBlurOpacityInput" value="90" min="0" max="100" step="5">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="dreamyBlurOpacitySlider">ぼかしレイヤー不透明度 (%)</label>
+            <span class="slider-value" id="dreamyBlurOpacityValue">90</span>
+          </div>
+          <input type="range" id="dreamyBlurOpacitySlider" class="custom-slider" value="90" min="0" max="100" step="5">
         </div>
         <div class="checkbox-group">
           <label><input type="checkbox" id="dreamyToneCurve" checked> トーンカーブ調整</label>
           <label><input type="checkbox" id="dreamyGradientMap" checked> グラデーションマップ調整</label>
         </div>
-        <div class="input-group">
-          <label for="dreamyGradientOpacityInput">グラデーションマップ<br>不透明度 (%):</label>
-          <input type="number" id="dreamyGradientOpacityInput" value="15" min="0" max="50" step="1">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="dreamyGradientOpacitySlider">グラデーションマップ不透明度 (%)</label>
+            <span class="slider-value" id="dreamyGradientOpacityValue">15</span>
+          </div>
+          <input type="range" id="dreamyGradientOpacitySlider" class="custom-slider" value="15" min="0" max="50" step="1">
         </div>
       </div>
       
       <!-- 暗部グレイン設定 -->
       <div class="setting-panel">
         <div class="setting-panel-title">暗部グレイン設定:</div>
-        <div class="input-group">
-          <label for="shadowThresholdInput">暗部しきい値:</label>
-          <input type="number" id="shadowThresholdInput" value="80" min="0" max="255" step="5">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="shadowThresholdSlider">暗部しきい値</label>
+            <span class="slider-value" id="shadowThresholdValue">80</span>
+          </div>
+          <input type="range" id="shadowThresholdSlider" class="custom-slider" value="80" min="0" max="255" step="5">
         </div>
-        <div class="input-group">
-          <label for="grainAmountInput">グレイン量 (%):</label>
-          <input type="number" id="grainAmountInput" value="25" min="1" max="50" step="1">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="grainAmountSlider">グレイン量 (%)</label>
+            <span class="slider-value" id="grainAmountValue">25</span>
+          </div>
+          <input type="range" id="grainAmountSlider" class="custom-slider" value="25" min="1" max="50" step="1">
         </div>
-        <div class="input-group">
-          <label for="featherRadiusInput">マスクのフェザー (px):</label>
-          <input type="number" id="featherRadiusInput" value="20" min="0" max="50" step="2">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="featherRadiusSlider">マスクのフェザー (px)</label>
+            <span class="slider-value" id="featherRadiusValue">20</span>
+          </div>
+          <input type="range" id="featherRadiusSlider" class="custom-slider" value="20" min="0" max="50" step="2">
         </div>
       </div>
       

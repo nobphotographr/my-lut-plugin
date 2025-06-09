@@ -80,40 +80,48 @@ html, body {
   min-height: 20px;
 }
 
-/* ダイアログスタイル - ExtendScript風 */
+/* 極限コンパクトダイアログスタイル */
 dialog {
   background: #3d3d3d;
-  border: none;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  border: 1px solid #4a4a4a;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
   color: #fff;
-  padding: 20px;
-  max-width: 450px;
+  padding: 16px 20px;
+  max-width: 380px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", sans-serif;
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
 }
 
 /* タイトル */
 dialog h2 {
-  margin: 0 0 20px 0;
+  margin: 0 0 16px 0;
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-align: center;
   font-weight: normal;
   border: none;
   padding: 0;
 }
 
-/* 設定パネル（グループボックス風） */
+/* 極限コンパクト設定パネル */
 .setting-panel {
-  background: #3d3d3d;
+  background: linear-gradient(135deg, #3d3d3d 0%, #3a3a3a 100%);
   border: none;
-  border-radius: 4px;
-  padding: 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #2c2d2d;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.setting-panel:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .setting-panel:last-child {
@@ -121,21 +129,28 @@ dialog h2 {
 }
 
 .setting-panel-title {
-  color: #ccc;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
-  font-weight: normal;
+  color: #e0e0e0;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 /* チェックボックスグループ */
 .checkbox-group label {
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  margin-bottom: 5px;
+  justify-content: flex-start;
+  text-align: left;
+  margin-bottom: 3px;
   color: #bbb;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  transition: color 0.2s ease;
+}
+
+.checkbox-group label:hover {
+  color: #ddd;
 }
 
 /* 数値入力グループ */
@@ -148,7 +163,7 @@ dialog h2 {
 
 .input-group label {
   color: #bbb;
-  font-size: 0.85rem;
+  font-size: 0.65rem;
   flex: 1;
 }
 
@@ -161,7 +176,7 @@ input[type="number"] {
   width: 80px;
   border-radius: 3px;
   text-align: right;
-  font-size: 0.85rem;
+  font-size: 0.65rem;
 }
 
 input[type="number"]:focus {
@@ -169,10 +184,18 @@ input[type="number"]:focus {
   border-color: #4a90e2;
 }
 
-/* チェックボックススタイル */
+/* モダンチェックボックススタイル */
 input[type="checkbox"] {
-  margin-right: 6px;
+  margin-right: 10px;
   accent-color: #4a90e2;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:hover {
+  transform: scale(1.1);
 }
 
 /* ダイアログボタン */
@@ -180,38 +203,52 @@ input[type="checkbox"] {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #555;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid #2c2d2d;
 }
 
 .dialog-buttons button {
-  padding: 4px 8px;
-  border: 1px solid #fff;
-  border-radius: 3px;
-  font-size: 0.9rem;
+  padding: 8px 16px;
+  border: 1px solid #4a90e2;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
   cursor: pointer;
-  width: 76px;
-  height: 24px;
+  width: 80px;
+  height: 32px;
   box-sizing: border-box;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .dialog-buttons button[type="button"] {
   background: transparent;
-  color: #fff;
+  border: 1px solid #666;
+  color: #ccc;
 }
 
 .dialog-buttons button[type="button"]:hover {
-  background: #777;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #999;
+  color: #fff;
+  transform: translateY(-1px);
 }
 
+
 .dialog-buttons button.primary {
-  background: #2c2d2d;
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  border-color: #4a90e2;
   color: #fff;
 }
 
 .dialog-buttons button.primary:hover {
-  background: #357abd;
+  background: linear-gradient(135deg, #357abd 0%, #2968a3 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
 }
 
 /* アラートダイアログのスタイル */
@@ -230,7 +267,7 @@ input[type="checkbox"] {
 .alert-dialog .dialog-content p {
   margin: 0;
   color: #ccc;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 .alert-dialog .dialog-buttons {
@@ -240,5 +277,129 @@ input[type="checkbox"] {
 }
 
 .alert-dialog .dialog-buttons button {
-  min-width: 80px;
+  background: #2c2d2d;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  color: #fff;
+  width: 76px;
+  height: 24px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.alert-dialog .dialog-buttons button:hover {
+  background: #357abd;
+}
+
+/* 超コンパクトスライダーグループ */
+.slider-group {
+  margin-bottom: 10px;
+  padding: 1px 0;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.slider-header label {
+  color: #ccc;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.slider-value {
+  color: #4a90e2;
+  font-size: 0.8rem;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-weight: 500;
+  min-width: 40px;
+  text-align: right;
+  background: rgba(74, 144, 226, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* スライダーの完全リセットと再定義 */
+input[type="range"].custom-slider {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  width: 100% !important;
+  height: 4px !important;
+  background: #4a4a4a !important;
+  border-radius: 2px !important;
+  outline: none !important;
+  opacity: 1 !important;
+  -webkit-transition: .2s !important;
+  transition: opacity .2s !important;
+  margin: 10px 0 !important;
+  cursor: pointer !important;
+}
+
+/* Webkitブラウザ用（Chrome/Safari） */
+input[type="range"].custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  background: #ffffff !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+/* トラックを非表示にして、input自体を背景として使用 */
+input[type="range"].custom-slider::-webkit-slider-runnable-track {
+  width: 100% !important;
+  height: 4px !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  border-radius: 2px !important;
+  border: none !important;
+}
+
+/* Firefox用 */
+input[type="range"].custom-slider::-moz-range-thumb {
+  width: 16px !important;
+  height: 16px !important;
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+input[type="range"].custom-slider::-moz-range-track {
+  width: 100% !important;
+  height: 4px !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  border-radius: 2px !important;
+  border: none !important;
+}
+
+/* セクション内最後の要素の下余白削除 */
+.setting-panel .slider-group:last-child,
+.setting-panel .checkbox-group:last-child {
+  margin-bottom: 0;
+}
+
+/* スライダーラッパー（必要時のみ） */
+.slider-wrapper {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.slider-wrapper .custom-slider {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
 }
